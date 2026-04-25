@@ -1,0 +1,2062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>travel buddy — by bunq</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0F0ED;
+    --bg-dot: rgba(0,0,0,0.055);
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F3;
+    --surface-3: #EBEBEA;
+    --border: rgba(0,0,0,0.07);
+    --border-strong: rgba(0,0,0,0.13);
+    --text: #141413;
+    --text-muted: #6B6B68;
+    --text-hint: #9A9A97;
+
+    /* bunq brand */
+    --bunq: #00A6FF;
+    --bunq-dark: #0088D4;
+    --bunq-pale: #E6F5FF;
+    --bunq-mid: rgba(0,166,255,0.12);
+
+    /* semantic */
+    --success: #1DB87A;
+    --success-bg: #E3F8EE;
+    --success-dark: #0F7A51;
+    --coral: #E05A3A;
+    --coral-bg: #FCEEE9;
+    --amber: #C47A00;
+    --amber-bg: #FFF6E0;
+
+    /* shape */
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 20px;
+    --r-xl: 26px;
+    --r-pill: 100px;
+
+    /* shadow */
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.07);
+    --shadow-phone: 0 24px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.10);
+    --shadow-btn: 0 2px 8px rgba(0,166,255,0.32);
+    --shadow-btn-hover: 0 6px 20px rgba(0,166,255,0.44);
+
+    /* bunq rainbow */
+    --rainbow: linear-gradient(90deg,
+      #00A6FF 0%,
+      #00C4D4 22%,
+      #1DB87A 44%,
+      #FFC94A 66%,
+      #FF6B9D 88%,
+      #B06EFF 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    /* subtle dot grid — bunq uses geometric patterns */
+    background-image: radial-gradient(circle, var(--bg-dot) 1px, transparent 1px);
+    background-size: 22px 22px;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    gap: 20px;
+  }
+
+  /* ─── LIVE BANNER ─── */
+  .live-banner {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: var(--r-pill);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.01em;
+    transition: background 0.4s, color 0.4s;
+  }
+  .live-banner.live  { background: var(--success-bg); color: var(--success-dark); }
+  .live-banner.mock  { background: var(--surface-3); color: var(--text-muted); }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background 0.4s;
+  }
+  .live .live-dot { background: var(--success); animation: pulse-green 2s infinite; }
+  .mock .live-dot { background: var(--text-hint); }
+
+  @keyframes pulse-green {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(29,184,122,0.5); }
+    50%       { box-shadow: 0 0 0 5px rgba(29,184,122,0); }
+  }
+
+  /* ─── STAGE (outer frame) ─── */
+  .stage {
+    background: linear-gradient(160deg, #E8E8E5 0%, #DDDDD9 100%);
+    border-radius: var(--r-xl);
+    padding: 32px 28px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 2px 0 rgba(0,0,0,0.08);
+  }
+
+  /* ─── PHONE ─── */
+  .phone {
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    border: 0.5px solid rgba(0,0,0,0.10);
+    overflow: hidden;
+    box-shadow: var(--shadow-phone);
+  }
+
+  .status-bar {
+    padding: 11px 22px 2px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-hint);
+    letter-spacing: 0.02em;
+  }
+
+  /* rainbow stripe — sits between status bar and header */
+  .rainbow-stripe {
+    height: 3px;
+    background: var(--rainbow);
+    opacity: 0.85;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    padding: 10px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .brand-logo { display: flex; align-items: center; gap: 9px; }
+  .brand-plane { width: 24px; height: 24px; flex-shrink: 0; }
+  .brand-text { display: flex; flex-direction: column; line-height: 1; }
+  .brand-name { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .brand-attr { font-size: 9px; color: var(--text-hint); margin-top: 2.5px; letter-spacing: 0.15px; font-weight: 500; }
+  .bunq-wordmark { font-weight: 700; color: var(--bunq); }
+
+  .pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: var(--r-pill);
+    background: var(--bunq-pale);
+    color: var(--bunq);
+    letter-spacing: 0.01em;
+    transition: all 0.25s ease;
+  }
+
+  /* ─── SCENES ─── */
+  .scene-wrap {
+    position: relative;
+    overflow: hidden;
+    min-height: 468px;
+  }
+  .scene {
+    padding: 20px;
+    min-height: 468px;
+    position: absolute;
+    inset: 0;
+    /* default hidden state */
+    opacity: 0;
+    transform: translateX(28px);
+    pointer-events: none;
+    transition: opacity 0.32s cubic-bezier(0.4,0,0.2,1),
+                transform 0.32s cubic-bezier(0.4,0,0.2,1);
+  }
+  .scene.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    position: relative;
+  }
+  .scene.exit-left {
+    opacity: 0;
+    transform: translateX(-28px);
+    pointer-events: none;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  h2 {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0 0 6px;
+    color: var(--text);
+    letter-spacing: -0.25px;
+  }
+  .sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin: 0 0 16px;
+    font-weight: 400;
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--surface);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border);
+  }
+
+  /* ─── CHIP ─── */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--surface-3);
+    border-radius: var(--r-pill);
+    color: var(--text-muted);
+    margin-right: 5px;
+    letter-spacing: 0.01em;
+    border: 1px solid var(--border);
+  }
+
+  /* ─── MODE PICK (scene 1) ─── */
+  .mode-cards { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .mode-card {
+    position: relative;
+    border-radius: var(--r-lg);
+    padding: 2px; /* space for rainbow border */
+    background: var(--rainbow);
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.4,0,0.2,1),
+                box-shadow 0.18s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .mode-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+  }
+  .mode-card:active { transform: translateY(0); }
+  .mode-card-inner {
+    background: var(--surface);
+    border-radius: calc(var(--r-lg) - 2px);
+    padding: 20px 18px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .mode-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    background: var(--rainbow);
+    position: relative;
+    overflow: hidden;
+  }
+  .mode-icon svg { position: relative; z-index: 1; }
+  /* frosted glass layer so icon has enough contrast */
+  .mode-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.22);
+  }
+  .mode-body { flex: 1; min-width: 0; }
+  .mode-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; margin-bottom: 4px; }
+  .mode-desc  { font-size: 12px; color: var(--text-muted); line-height: 1.5; font-weight: 400; }
+  .mode-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    /* rainbow text */
+    background: var(--rainbow);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .mode-arrow {
+    color: var(--text-hint);
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: transform 0.18s ease, color 0.18s ease;
+  }
+  .mode-card:hover .mode-arrow { transform: translateX(3px); color: var(--bunq); }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    padding: 14px 20px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .footer-row { display: flex; gap: 8px; align-items: center; }
+
+  /* ─── BUTTONS ─── */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Figtree', sans-serif;
+    background: var(--bunq);
+    color: white;
+    border: none;
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    box-shadow: var(--shadow-btn);
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+  }
+  .btn:hover  { background: var(--bunq-dark); box-shadow: var(--shadow-btn-hover); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0px); box-shadow: var(--shadow-btn); }
+  .btn:disabled { opacity: 0.52; cursor: wait; transform: none; box-shadow: none; }
+
+  .btn-ghost {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 13px 18px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1.5px solid var(--border-strong);
+    box-shadow: none;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--text); box-shadow: none; transform: none; }
+  .footer-row .btn:not(.btn-ghost) { flex: 1; }
+
+  /* ─── KV LABELS ─── */
+  .kv     { font-size: 10px; font-weight: 600; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
+  .kv-val { font-size: 13px; font-weight: 600; color: var(--text); }
+  .kv-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 400; }
+
+  /* ─── SCENE 0: WELCOME ─── */
+  .buddies { display: flex; gap: 10px; margin-top: 10px; }
+  .buddy {
+    flex: 1;
+    text-align: center;
+    padding: 10px 6px;
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    transition: box-shadow 0.15s;
+  }
+  .buddy:hover { box-shadow: var(--shadow-card); }
+  .buddy .avatar { margin: 0 auto 6px; width: 34px; height: 34px; font-size: 13px; }
+  .buddy-name { font-size: 12px; font-weight: 600; color: var(--text); }
+  .buddy-meta { font-size: 10px; color: var(--text-hint); margin-top: 2px; }
+
+  .history-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .history-row:first-of-type { border-top: 0; padding-top: 2px; }
+  .history-place { font-size: 12px; font-weight: 600; color: var(--text); }
+  .history-meta  { font-size: 10px; color: var(--text-hint); margin-top: 2px; }
+  .history-amount { font-size: 12px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+
+  /* ─── SCENE 1: MENU ─── */
+  .menu-split { display: flex; gap: 10px; margin: 14px 0 4px; }
+  .menu-translated {
+    flex: 1;
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 11px;
+    border: 1px solid var(--border);
+  }
+  .menu-row { display: grid; grid-template-columns: 1fr auto; gap: 1px 8px; align-items: baseline; }
+  .menu-jp  { grid-column: 1; color: var(--text-hint); font-size: 9.5px; }
+  .menu-en  { grid-column: 1; color: var(--text); font-weight: 600; font-size: 11.5px; line-height: 1.2; }
+  .menu-price { grid-row: span 2; grid-column: 2; color: var(--bunq); font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; }
+
+  /* ─── CAMERA VIEWFINDER (scenes 2 & 4) ─── */
+  .cam-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: #0E0E0E;
+    border-radius: var(--r-md);
+    overflow: hidden;
+    margin-bottom: 14px;
+    /* simulate camera grain */
+    box-shadow: inset 0 0 60px rgba(0,0,0,0.5);
+  }
+  /* subtle grid lines like a real viewfinder */
+  .cam-frame::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 33.3% 33.3%;
+    pointer-events: none;
+  }
+  .cam-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* corner bracket guides */
+  .cam-corner {
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: rgba(0,166,255,0.9);
+    border-style: solid;
+  }
+  .cam-corner.tl { top: 14px; left: 14px; border-width: 2px 0 0 2px; }
+  .cam-corner.tr { top: 14px; right: 14px; border-width: 2px 2px 0 0; }
+  .cam-corner.bl { bottom: 14px; left: 14px; border-width: 0 0 2px 2px; }
+  .cam-corner.br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; }
+  /* scan line */
+  .cam-scanline {
+    position: absolute;
+    left: 14px; right: 14px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--bunq), transparent);
+    top: 14px;
+    opacity: 0;
+    transition: none;
+  }
+  .cam-scanline.scan-go {
+    opacity: 1;
+    animation: scan-sweep 0.85s ease-in-out forwards;
+  }
+  @keyframes scan-sweep {
+    0%   { top: 14px; opacity: 0.9; }
+    100% { top: calc(100% - 14px); opacity: 0; }
+  }
+  /* subject hint text in the viewfinder */
+  .cam-hint {
+    font-size: 16px;
+    color: rgba(255,255,255,0.18);
+    font-family: serif;
+    letter-spacing: 2px;
+    user-select: none;
+    pointer-events: none;
+  }
+  /* flash overlay */
+  .cam-flash {
+    position: absolute; inset: 0;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.08s;
+  }
+  .cam-flash.flash-go {
+    animation: cam-flash 0.45s ease-out forwards;
+  }
+  @keyframes cam-flash {
+    0%   { opacity: 0.95; }
+    100% { opacity: 0; }
+  }
+  /* shutter button + controls row */
+  .cam-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .cam-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--surface-2);
+    border-radius: var(--r-pill);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    flex: 1;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .shutter-btn {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  .shutter-btn:hover  { box-shadow: 0 4px 16px rgba(0,0,0,0.2); transform: scale(1.04); }
+  .shutter-btn:active { transform: scale(0.94); }
+  .shutter-btn:disabled { opacity: 0.5; cursor: wait; }
+  .shutter-inner {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid rgba(0,0,0,0.15);
+  }
+  .cam-tip {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-hint);
+    margin-top: 8px;
+    font-weight: 500;
+  }
+
+  /* ─── VOICE RECORDER ─── */
+  .voice-recorder {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 12px 14px;
+  }
+  .voice-rec-row { display: flex; align-items: center; gap: 12px; }
+  .record-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    background: none; border: none; cursor: pointer;
+    flex-shrink: 0;
+  }
+  .record-icon {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--coral-bg);
+    border: 2px solid var(--coral);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .record-icon svg { stroke: var(--coral); }
+  .record-btn.recording .record-icon {
+    background: var(--coral);
+    animation: rec-pulse 1s ease-in-out infinite;
+  }
+  .record-btn.recording .record-icon svg { stroke: white; }
+  @keyframes rec-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(224,90,58,0.4); }
+    50%       { box-shadow: 0 0 0 8px rgba(224,90,58,0); }
+  }
+  .record-label { font-size: 10px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+  .voice-waveform { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .waveform-bars {
+    display: flex; align-items: center; gap: 2px;
+    height: 28px;
+  }
+  .wbar {
+    flex: 1;
+    background: var(--bunq);
+    border-radius: 2px;
+    opacity: 0.7;
+    animation: wbar-bounce 0.5s ease-in-out infinite alternate;
+  }
+  @keyframes wbar-bounce {
+    from { transform: scaleY(0.3); }
+    to   { transform: scaleY(1); }
+  }
+  .voice-transcript-preview {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.4;
+    min-height: 14px;
+    font-weight: 400;
+  }
+
+  /* ─── SCENE 2: CAPTURE ─── */
+  .receipt { display: flex; justify-content: center; padding: 4px 0 14px; }
+  .voice {
+    font-style: italic;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 10px 14px;
+    border-left: 3px solid var(--bunq);
+    background: var(--bunq-pale);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    margin: 12px 0 0;
+  }
+  .voice-editable { padding: 10px 14px 12px; }
+  .voice-label { font-size: 10px; color: var(--bunq); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-style: normal; }
+  .voice-text { outline: none; color: var(--text-muted); }
+  .voice-text:focus {
+    background: white;
+    border-radius: var(--r-sm);
+    padding: 4px 6px;
+    margin: -4px -6px;
+    box-shadow: 0 0 0 2px var(--bunq);
+    color: var(--text);
+  }
+
+  /* ─── SCENE 3: AGENTS ─── */
+  .orch {
+    background: linear-gradient(135deg, var(--bunq-pale) 0%, #F0F9FF 100%);
+    border-radius: var(--r-md);
+    padding: 12px 16px;
+    text-align: center;
+    margin-bottom: 8px;
+    border: 1px solid rgba(0,166,255,0.18);
+  }
+  .orch-label { font-size: 10px; font-weight: 600; color: var(--bunq); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 2px; }
+  .orch-name  { font-size: 13px; font-weight: 700; color: var(--text); }
+
+  .agents { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin: 14px 0 4px; }
+  .agent {
+    background: var(--surface-2);
+    border-radius: var(--r-sm);
+    padding: 11px 6px;
+    font-size: 11px;
+    text-align: center;
+    border: 1px solid var(--border);
+    opacity: 0.38;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .agent.active {
+    opacity: 1;
+    border-color: var(--bunq);
+    background: var(--bunq-pale);
+    box-shadow: 0 0 0 3px var(--bunq-mid), 0 2px 12px rgba(0,166,255,0.18);
+    animation: agent-pulse 1.2s ease-in-out infinite;
+  }
+  .agent.done {
+    opacity: 1;
+    border-color: var(--success);
+    background: var(--success-bg);
+    box-shadow: none;
+  }
+  @keyframes agent-pulse {
+    0%, 100% { box-shadow: 0 0 0 3px var(--bunq-mid), 0 2px 12px rgba(0,166,255,0.18); }
+    50%       { box-shadow: 0 0 0 5px rgba(0,166,255,0.08), 0 2px 20px rgba(0,166,255,0.28); }
+  }
+  .agent-name { font-weight: 700; color: var(--text); margin-bottom: 2px; font-size: 11.5px; }
+  .agent-sub  { color: var(--text-hint); font-size: 10px; font-weight: 500; }
+  .status-line { font-size: 12px; font-weight: 500; color: var(--text-muted); min-height: 20px; margin-top: 10px; text-align: center; }
+
+  /* ─── SCENE 4: SPLIT ─── */
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    flex-shrink: 0;
+    background: var(--bunq-pale); color: var(--bunq);
+  }
+  .avatar.av-coral { background: var(--coral-bg);   color: var(--coral); }
+  .avatar.av-teal  { background: var(--success-bg); color: var(--success-dark); }
+
+  /* memory chip — kept for paid screen */
+  .memory-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--bunq-pale);
+    color: var(--bunq);
+    border-radius: var(--r-pill);
+    margin-bottom: 10px;
+    border: 1px solid rgba(0,166,255,0.2);
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .memory-chip:hover { background: #D4EEFF; box-shadow: 0 2px 8px rgba(0,166,255,0.15); }
+  .memory-detail {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+    background: var(--bunq-pale); border-radius: var(--r-sm);
+    margin-bottom: 10px; border: 1px solid transparent;
+  }
+  .memory-detail.open { max-height: 260px; padding: 12px 14px; border-color: rgba(0,166,255,0.15); }
+  .memory-detail-title  { font-size: 11px; font-weight: 700; color: var(--bunq); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .memory-detail-text   { font-size: 12px; color: var(--text); line-height: 1.5; }
+  .memory-detail-text .jp { font-weight: 700; }
+  .memory-detail-prompt {
+    font-size: 11px; font-weight: 600; color: var(--bunq); margin-top: 10px;
+    padding: 7px 12px; background: white; border-radius: var(--r-sm);
+    cursor: pointer; border: 1px solid rgba(0,166,255,0.25);
+    display: inline-block; transition: background 0.15s;
+  }
+  .memory-detail-prompt:hover { background: var(--bunq-pale); }
+
+  /* ─── SPLIT ROWS — progressive disclosure ─── */
+  .split-total-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
+  }
+  .split-total-label { font-size: 11px; font-weight: 600; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.6px; }
+  .split-total-amt   { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+  .split-total-sub   { font-size: 11px; color: var(--text-hint); font-weight: 500; margin-top: 1px; text-align: right; }
+
+  /* each person block */
+  .split-row {
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    margin-bottom: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s;
+  }
+  .split-row:has(.split-drawer.open) { box-shadow: var(--shadow-card); }
+
+  /* the always-visible summary line */
+  .split-row-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .split-row-head:hover { background: var(--surface-2); }
+  /* "you" row not tappable */
+  .split-row.no-action .split-row-head { cursor: default; }
+  .split-row.no-action .split-row-head:hover { background: var(--surface); }
+
+  .split-row-info   { flex: 1; min-width: 0; }
+  .split-row-name   { font-size: 13px; font-weight: 700; color: var(--text); }
+  .split-row-sub    { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-top: 1px; }
+
+  .split-row-right  { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .split-row-eur    { font-size: 15px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .split-row-jpy    { font-size: 10px; color: var(--text-hint); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  /* action button on the right of the head row */
+  .split-row-action {
+    flex-shrink: 0;
+    padding: 7px 13px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Figtree', sans-serif;
+    border: none;
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .split-row-action.act-bunq {
+    background: var(--bunq);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,166,255,0.28);
+  }
+  .split-row-action.act-bunq:hover { background: var(--bunq-dark); box-shadow: 0 4px 14px rgba(0,166,255,0.4); transform: translateY(-1px); }
+  .split-row-action.act-bunq:disabled { opacity: 0.55; cursor: wait; transform: none; box-shadow: none; }
+  .split-row-action.act-link {
+    background: transparent;
+    color: var(--bunq);
+    border: 1.5px solid var(--bunq);
+  }
+  .split-row-action.act-link:hover { background: var(--bunq-pale); }
+
+  /* chevron that rotates when drawer is open */
+  .split-chevron {
+    color: var(--text-hint);
+    flex-shrink: 0;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), color 0.15s;
+  }
+  .split-row:has(.split-drawer.open) .split-chevron { transform: rotate(180deg); color: var(--bunq); }
+
+  /* collapsible drawer */
+  .split-drawer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1);
+    border-top: 0px solid var(--border);
+  }
+  .split-drawer.open {
+    max-height: 320px;
+    border-top-width: 1px;
+  }
+  .split-drawer-inner { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* message preview inside drawer */
+  .drawer-msg-label { font-size: 9px; font-weight: 700; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .drawer-msg-text  {
+    font-size: 12px; color: var(--text); line-height: 1.45;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 8px 11px;
+    outline: none; min-height: 16px;
+  }
+  .drawer-msg-text:focus { border-color: var(--bunq); box-shadow: 0 0 0 3px var(--bunq-mid); background: white; }
+
+  /* payment options row inside Marco's drawer */
+  .drawer-pay-opts { display: flex; flex-direction: column; gap: 6px; }
+  .drawer-pay-opt {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .drawer-pay-opt:hover { border-color: var(--border-strong); box-shadow: var(--shadow-card); }
+  .drawer-pay-opt.recommended {
+    background: var(--bunq-pale);
+    border-color: rgba(0,166,255,0.35);
+    box-shadow: 0 0 0 3px var(--bunq-mid);
+  }
+  .drawer-pay-opt.recommended:hover { border-color: var(--bunq); }
+  .drawer-pay-opt-left { display: flex; flex-direction: column; gap: 2px; }
+  .drawer-pay-opt-name { font-size: 12px; font-weight: 700; color: var(--text); }
+  .drawer-pay-opt.recommended .drawer-pay-opt-name { color: var(--bunq); }
+  .drawer-pay-opt-meta { font-size: 10px; color: var(--text-muted); font-weight: 400; }
+  .drawer-pay-opt.recommended .drawer-pay-opt-meta { color: var(--bunq); opacity: 0.8; }
+  .drawer-rec-badge { font-size: 9px; padding: 2px 8px; background: var(--bunq); color: white; border-radius: var(--r-pill); font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; }
+
+  /* "you paid" badge */
+  .you-badge { font-size: 11px; font-weight: 600; color: var(--success-dark); background: var(--success-bg); padding: 5px 11px; border-radius: var(--r-pill); border: 1px solid rgba(29,184,122,0.2); }
+
+  /* total row below split list */
+  .split-total-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 2px 0; border-top: 1px solid var(--border-strong);
+    margin-top: 2px;
+  }
+  .split-total-row-label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  .split-total-row-amt   { font-size: 13px; font-weight: 700; color: var(--text); }
+
+  /* tip card — still used on paid screen */
+  .tip-card {
+    display: flex; gap: 11px; padding: 11px 14px;
+    margin-top: 14px; background: var(--bunq-pale);
+    border-radius: var(--r-md); border: 1px solid rgba(0,166,255,0.18);
+  }
+  .tip-icon  { color: var(--bunq); flex-shrink: 0; padding-top: 1px; }
+  .tip-title { font-size: 10px; font-weight: 700; color: var(--bunq); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .tip-text  { font-size: 12px; color: var(--text); line-height: 1.45; font-weight: 400; }
+  .tip-text .jp { font-weight: 700; }
+
+  /* ─── SETTLED SCREEN ─── */
+  .req-id {
+    display: inline-block;
+    padding: 3px 10px;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 10.5px;
+    background: var(--success-bg);
+    color: var(--success-dark);
+    border-radius: var(--r-pill);
+    margin-top: 7px;
+    border: 1px solid rgba(29,184,122,0.2);
+  }
+  .settled-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 0 28px;
+    text-align: center;
+  }
+  .settled-ring {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--success-bg);
+    display: flex; align-items: center; justify-content: center;
+    animation: pop-in 0.45s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 0 0 10px rgba(29,184,122,0.08);
+  }
+  @keyframes pop-in {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .settled-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    margin-top: 16px;
+  }
+  .settled-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 5px;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  /* 3-column stat strip */
+  .settled-strip {
+    display: flex;
+    align-items: center;
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .settled-strip-item {
+    flex: 1;
+    text-align: center;
+    padding: 12px 6px;
+  }
+  .settled-strip-val {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.2px;
+  }
+  .settled-strip-key {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+  .settled-strip-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border-strong);
+    flex-shrink: 0;
+  }
+
+  /* collapsible detail chips */
+  .settled-chips {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 16px;
+    background: var(--surface);
+  }
+  .settled-chip-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 14px;
+    cursor: pointer;
+    border-top: 1px solid var(--border);
+    transition: background 0.15s;
+    gap: 10px;
+  }
+  .settled-chip-row:first-child { border-top: 0; }
+  .settled-chip-row:hover { background: var(--surface-2); }
+  .settled-chip-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex: 1;
+    min-width: 0;
+  }
+  .settled-chip-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .settled-chip-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .settled-chip-chevron {
+    flex-shrink: 0;
+    color: var(--text-hint);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), color 0.15s;
+  }
+  .settled-chip-chevron.open { transform: rotate(180deg); color: var(--bunq); }
+
+  .settled-chip-detail {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4,0,0.2,1);
+    background: var(--surface-2);
+    border-top: 0px solid var(--border);
+  }
+  .settled-chip-detail.open {
+    max-height: 160px;
+    border-top-width: 1px;
+  }
+  .settled-chip-detail-inner {
+    padding: 11px 14px 13px 30px;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    font-weight: 400;
+  }
+  .settled-tree-bar {
+    height: 4px;
+    background: rgba(29,184,122,0.15);
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+  .settled-tree-fill {
+    height: 100%;
+    width: 78%;
+    background: var(--success);
+    border-radius: var(--r-pill);
+  }
+  .settled-tree-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-hint);
+  }
+
+  /* ─── CHAT DOCK ─── */
+  .chat-dock { margin-top: 18px; padding-top: 13px; border-top: 1px solid var(--border); }
+  .chat-thread { display: flex; flex-direction: column; gap: 7px; margin-bottom: 10px; max-height: 220px; overflow-y: auto; }
+  .chat-thread:empty { display: none; }
+  .chat-msg { padding: 9px 13px; border-radius: var(--r-md); font-size: 12px; line-height: 1.5; max-width: 85%; word-wrap: break-word; font-weight: 400; }
+  .chat-msg-user { align-self: flex-end; background: var(--bunq); color: white; border-radius: var(--r-md) var(--r-md) 4px var(--r-md); }
+  .chat-msg-bot { align-self: flex-start; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--r-md) var(--r-md) var(--r-md) 4px; }
+  .chat-typing   { color: var(--text-hint); font-style: italic; }
+
+  .chat-suggestions { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
+  .chat-sug {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 5px 11px;
+    background: var(--bunq-pale);
+    color: var(--bunq);
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .chat-sug:hover { border-color: var(--bunq); background: #D4EEFF; }
+
+  .chat-input-row { display: flex; gap: 7px; }
+  .chat-input {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 400;
+    font-family: 'Figtree', sans-serif;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .chat-input:focus { border-color: var(--bunq); box-shadow: 0 0 0 3px var(--bunq-mid); }
+  .chat-send {
+    padding: 8px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Figtree', sans-serif;
+    background: var(--bunq);
+    color: white;
+    border: none;
+    border-radius: var(--r-pill);
+    cursor: pointer;
+    transition: background 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .chat-send:hover { background: var(--bunq-dark); }
+
+  /* ─── BALANCE CARD (scene 0) ─── */
+  #balance-card { background: linear-gradient(135deg, #EAF6FF 0%, #F0F9FF 100%); border-color: rgba(0,166,255,0.18); }
+
+</style>
+</head>
+<body>
+
+<div class="live-banner mock" id="live-banner">
+  <span class="live-dot"></span>
+  <span id="live-text">Checking bunq proxy...</span>
+</div>
+
+<div class="stage">
+  <div class="phone">
+    <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+    <div class="rainbow-stripe"></div>
+
+    <div class="header">
+      <div class="brand-logo">
+        <svg class="brand-plane" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="plane-rainbow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%"   stop-color="#00A6FF"/>
+              <stop offset="28%"  stop-color="#00C4D4"/>
+              <stop offset="54%"  stop-color="#1DB87A"/>
+              <stop offset="78%"  stop-color="#FFC94A"/>
+              <stop offset="100%" stop-color="#FF6B9D"/>
+            </linearGradient>
+          </defs>
+          <path d="M28 4 L3 13 L12 17 Z" fill="url(#plane-rainbow)"/>
+          <path d="M28 4 L12 17 L13 27 L18 20 Z" fill="url(#plane-rainbow)" opacity="0.55"/>
+          <path d="M28 4 L12 17 L18 20 Z" fill="url(#plane-rainbow)" opacity="0.82"/>
+        </svg>
+        <div class="brand-text">
+          <span class="brand-name">travel buddy</span>
+          <span class="brand-attr">by <span class="bunq-wordmark">bunq</span></span>
+        </div>
+      </div>
+      <span class="pill" id="pill">Tokyo</span>
+    </div>
+
+    <div class="scene-wrap">
+
+      <!-- SCENE 0: WELCOME -->
+      <div class="scene" data-scene="0">
+
+        <!-- location + greeting -->
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px">
+          <div class="chip" style="margin:0">
+            <svg width="12" height="12" viewBox="0 0 16 16"><path d="M8 1.5C5.24 1.5 3 3.74 3 6.5c0 3.75 5 8 5 8s5-4.25 5-8c0-2.76-2.24-5-5-5z" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6.5" r="1.8" fill="currentColor"/></svg>
+            Shinjuku, Tokyo
+          </div>
+        </div>
+        <h2>ようこそ — you've landed in Tokyo</h2>
+        <p class="sub">Snap any menu or bill, add a voice note, and I'll translate, convert to euros, and split with your group.</p>
+
+        <!-- trip + buddies merged into one card -->
+        <div class="card" style="margin-bottom:10px">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px">
+            <div class="kv" style="margin:0">Current trip</div>
+            <div style="font-size:11px; color:var(--text-hint); font-weight:500">6 days · 3 people</div>
+          </div>
+          <div class="buddies">
+            <div class="buddy">
+              <div class="avatar av-coral">J</div>
+              <div class="buddy-name">Julia</div>
+              <div class="buddy-meta">12 splits · <span class="bunq-wordmark">bunq</span></div>
+            </div>
+            <div class="buddy">
+              <div class="avatar av-teal">M</div>
+              <div class="buddy-name">Marco</div>
+              <div class="buddy-meta">8 splits · link</div>
+            </div>
+            <div class="buddy">
+              <div class="avatar">A</div>
+              <div class="buddy-name">Ana</div>
+              <div class="buddy-meta">5 splits · <span class="bunq-wordmark">bunq</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- recent trips — compact, no label overhead -->
+        <div class="card" id="balance-card-wrap">
+          <div class="kv" style="margin-bottom:8px">Past trips</div>
+          <div class="history-row">
+            <div>
+              <div class="history-place">Lisbon · weekend</div>
+              <div class="history-meta">with Julia, Ana</div>
+            </div>
+            <div class="history-amount">€142.30</div>
+          </div>
+          <div class="history-row">
+            <div>
+              <div class="history-place">Bali · dive week</div>
+              <div class="history-meta">with Marco</div>
+            </div>
+            <div class="history-amount">€438.00</div>
+          </div>
+          <div class="history-row" style="border:0; padding-bottom:0">
+            <div>
+              <div class="history-place">Paris · solo</div>
+              <div class="history-meta">4 expenses</div>
+            </div>
+            <div class="history-amount">€88.50</div>
+          </div>
+          <!-- sandbox balance slotted in here when live -->
+          <div id="balance-card" style="display:none; margin-top:10px; padding-top:10px; border-top:1px solid var(--border)">
+            <div class="kv">Sandbox account</div>
+            <div class="kv-val" id="balance-val">—</div>
+            <div class="kv-sub" id="balance-sub">—</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SCENE 1: MODE PICK -->
+      <div class="scene" data-scene="1">
+        <h2>What do you need?</h2>
+        <p class="sub">Pick what you're looking at right now — I'll adapt to the moment.</p>
+
+        <div class="mode-cards">
+
+          <div class="mode-card" onclick="pickMode('menu')">
+            <div class="mode-card-inner">
+              <div class="mode-icon">
+                <!-- menu / book icon -->
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/>
+                  <line x1="7" y1="8" x2="17" y2="8"/>
+                  <line x1="7" y1="12" x2="17" y2="12"/>
+                  <line x1="7" y1="16" x2="13" y2="16"/>
+                </svg>
+              </div>
+              <div class="mode-body">
+                <div class="mode-title">Scan the menu</div>
+                <div class="mode-desc">Before you order — I'll translate everything, convert to euros, and remember what you pick for later splitting.</div>
+                <div class="mode-tag">Before eating</div>
+              </div>
+              <div class="mode-arrow">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 3 L11 8 L6 13"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="mode-card" onclick="pickMode('bill')">
+            <div class="mode-card-inner">
+              <div class="mode-icon">
+                <!-- receipt / bill icon -->
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 3 L4 21 L8 18 L12 21 L16 18 L20 21 L20 3 Z"/>
+                  <line x1="8" y1="9"  x2="16" y2="9"/>
+                  <line x1="8" y1="13" x2="16" y2="13"/>
+                </svg>
+              </div>
+              <div class="mode-body">
+                <div class="mode-title">Scan the bill</div>
+                <div class="mode-desc">After the meal — snap the receipt, add a voice note about who had what, and I'll split it instantly via bunq.</div>
+                <div class="mode-tag">Settle up now</div>
+              </div>
+              <div class="mode-arrow">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 3 L11 8 L6 13"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SCENE 2: CAMERA — point at menu -->
+      <div class="scene" data-scene="2">
+        <h2>Point at the menu</h2>
+        <p class="sub">Hold your camera steady. I'll scan, translate, and convert everything in one shot.</p>
+
+        <div class="cam-frame">
+          <div class="cam-overlay">
+            <!-- corner guides -->
+            <div class="cam-corner tl"></div>
+            <div class="cam-corner tr"></div>
+            <div class="cam-corner bl"></div>
+            <div class="cam-corner br"></div>
+            <!-- scan line -->
+            <div class="cam-scanline" id="menu-scanline"></div>
+            <!-- subject hint -->
+            <div class="cam-hint">お品書き</div>
+          </div>
+          <div class="cam-flash" id="menu-flash"></div>
+        </div>
+
+        <div class="cam-controls">
+          <div class="cam-chip">
+            <svg width="11" height="11" viewBox="0 0 16 16"><rect x="2" y="5" width="12" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="9.5" r="2.2" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="5.5" y="3" width="5" height="2.2" rx="0.5" fill="currentColor"/></svg>
+            Auto-translate on
+          </div>
+          <button class="shutter-btn" id="menu-shutter" onclick="shootMenu()">
+            <div class="shutter-inner"></div>
+          </button>
+          <div class="cam-chip">
+            <svg width="11" height="11" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M8 5 V8 L10 9.5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
+            Memory on
+          </div>
+        </div>
+        <p class="cam-tip">Tap the shutter to capture</p>
+      </div>
+
+      <!-- SCENE 3: MENU TRANSLATED (was scene 2) -->
+      <div class="scene" data-scene="3">
+        <h2>Menu translated</h2>
+        <p class="sub">Now tell me who's ordering what — I'll remember it for the split later.</p>
+        <div class="menu-split">
+          <div class="menu-photo">
+            <svg viewBox="0 0 160 260" width="148" height="242">
+              <rect x="4" y="4" width="152" height="252" fill="#2A1F18" rx="5"/>
+              <rect x="10" y="10" width="140" height="240" fill="#F4EDDC" rx="3"/>
+              <text x="80" y="32" font-size="11" font-weight="600" text-anchor="middle" fill="#2A1F18" font-family="serif">お品書き</text>
+              <line x1="22" y1="44" x2="138" y2="44" stroke="#8B7355" stroke-width="0.5"/>
+              <g font-size="9" fill="#2A1F18">
+                <text x="22" y="62">唐揚げ</text><text x="138" y="62" text-anchor="end">¥1,200</text>
+                <text x="22" y="82">刺身盛り合わせ</text><text x="138" y="82" text-anchor="end">¥3,500</text>
+                <text x="22" y="102">焼き鳥 6本</text><text x="138" y="102" text-anchor="end">¥1,800</text>
+                <text x="22" y="122">餃子</text><text x="138" y="122" text-anchor="end">¥900</text>
+                <text x="22" y="142">ビール</text><text x="138" y="142" text-anchor="end">¥800</text>
+                <text x="22" y="162">日本酒</text><text x="138" y="162" text-anchor="end">¥2,800</text>
+                <text x="22" y="182">味噌汁</text><text x="138" y="182" text-anchor="end">¥400</text>
+              </g>
+            </svg>
+          </div>
+          <div class="menu-translated">
+            <div class="menu-row"><span class="menu-jp">唐揚げ</span><span class="menu-en">Fried chicken</span><span class="menu-price">€7.50</span></div>
+            <div class="menu-row"><span class="menu-jp">刺身盛り合わせ</span><span class="menu-en">Sashimi platter</span><span class="menu-price">€21.87</span></div>
+            <div class="menu-row"><span class="menu-jp">焼き鳥 6本</span><span class="menu-en">Yakitori, 6 skewers</span><span class="menu-price">€11.25</span></div>
+            <div class="menu-row"><span class="menu-jp">餃子</span><span class="menu-en">Dumplings</span><span class="menu-price">€5.62</span></div>
+            <div class="menu-row"><span class="menu-jp">ビール</span><span class="menu-en">Beer</span><span class="menu-price">€5.00</span></div>
+            <div class="menu-row"><span class="menu-jp">日本酒</span><span class="menu-en">Sake (bottle)</span><span class="menu-price">€17.50</span></div>
+            <div class="menu-row"><span class="menu-jp">味噌汁</span><span class="menu-en">Miso soup</span><span class="menu-price">€2.50</span></div>
+          </div>
+        </div>
+
+        <!-- voice note: who ordered what -->
+        <div class="voice-recorder" style="margin-top:12px">
+          <div class="voice-rec-row">
+            <button class="record-btn" id="record-btn-menu" onclick="startRecordingMenu()">
+              <div class="record-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                  <rect x="9" y="2" width="6" height="12" rx="3"/>
+                  <path d="M5 10 C5 15.5 9 19 12 19 C15 19 19 15.5 19 10"/>
+                  <line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+              </div>
+              <span class="record-label" id="record-label-menu">Who's having what?</span>
+            </button>
+            <div class="voice-waveform">
+              <div class="waveform-bars" id="waveform-bars-menu"></div>
+              <div class="voice-transcript-preview" id="voice-preview-menu"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chip" style="margin-top:12px">
+          <svg width="11" height="11" viewBox="0 0 16 16"><path d="M8 2 L8 8 L12 10" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>
+          Saved to your Tokyo trip memory
+        </div>
+      </div>
+
+      <!-- SCENE 4: CAMERA+VOICE — point at bill -->
+      <div class="scene" data-scene="4">
+        <h2>Capture the bill</h2>
+        <p class="sub">Snap the receipt, then record a voice note about who had what. I'll handle the rest.</p>
+
+        <div class="cam-frame">
+          <div class="cam-overlay">
+            <div class="cam-corner tl"></div>
+            <div class="cam-corner tr"></div>
+            <div class="cam-corner bl"></div>
+            <div class="cam-corner br"></div>
+            <div class="cam-scanline" id="bill-scanline"></div>
+            <div class="cam-hint">居酒屋さくら</div>
+          </div>
+          <div class="cam-flash" id="bill-flash"></div>
+        </div>
+
+        <!-- voice recorder -->
+        <div class="voice-recorder" id="voice-recorder">
+          <div class="voice-rec-row">
+            <button class="record-btn" id="record-btn" onclick="startRecording()">
+              <div class="record-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                  <rect x="9" y="2" width="6" height="12" rx="3"/>
+                  <path d="M5 10 C5 15.5 9 19 12 19 C15 19 19 15.5 19 10"/>
+                  <line x1="12" y1="19" x2="12" y2="22"/>
+                </svg>
+              </div>
+              <span class="record-label" id="record-label">Hold to record</span>
+            </button>
+            <div class="voice-waveform" id="voice-waveform">
+              <div class="waveform-bars" id="waveform-bars"></div>
+              <div class="voice-transcript-preview" id="voice-preview"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cam-controls" style="margin-top:12px">
+          <div class="cam-chip">
+            <svg width="11" height="11" viewBox="0 0 16 16"><rect x="2" y="5" width="12" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="9.5" r="2.2" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="5.5" y="3" width="5" height="2.2" rx="0.5" fill="currentColor"/></svg>
+            Auto-OCR on
+          </div>
+          <button class="shutter-btn" id="bill-shutter" onclick="shootBill()">
+            <div class="shutter-inner"></div>
+          </button>
+          <div class="cam-chip">
+            <svg width="11" height="11" viewBox="0 0 12 16"><rect x="3.5" y="1.5" width="5" height="8.5" rx="2.5" fill="currentColor"/><path d="M1.5 8 C1.5 11.3 4 13.3 6 13.3 C8 13.3 10.5 11.3 10.5 8" stroke="currentColor" stroke-width="1.3" fill="none"/><line x1="6" y1="13.3" x2="6" y2="15" stroke="currentColor" stroke-width="1.3"/></svg>
+            Voice ready
+          </div>
+        </div>
+        <p class="cam-tip">Snap the bill, then record who had what</p>
+      </div>
+
+      <!-- SCENE 5: CAPTURE (was scene 3) -->
+      <div class="scene" data-scene="5">
+        <h2>Captured at Izakaya Sakura</h2>
+        <p class="sub">Photo and voice note ready. Tap to send to travel buddy.</p>
+        <div class="receipt">
+          <svg viewBox="0 0 240 300" width="200" height="250" style="transform: rotate(-1.2deg); filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));">
+            <rect x="12" y="10" width="216" height="280" fill="#FEFDFA" stroke="#D4D3CC" stroke-width="0.8"/>
+            <text x="120" y="36" font-size="13" font-weight="600" text-anchor="middle" fill="#2A2A28" font-family="serif">居酒屋さくら</text>
+            <text x="120" y="51" font-size="9" text-anchor="middle" fill="#888">Izakaya Sakura · Shibuya</text>
+            <line x1="26" y1="66" x2="214" y2="66" stroke="#D0D0CA" stroke-dasharray="2 2" stroke-width="0.5"/>
+            <g font-size="10" fill="#2A2A28">
+              <text x="26" y="86">唐揚げ</text><text x="214" y="86" text-anchor="end">¥1,200</text>
+              <text x="26" y="104">刺身盛り合わせ</text><text x="214" y="104" text-anchor="end">¥3,500</text>
+              <text x="26" y="122">焼き鳥 6本</text><text x="214" y="122" text-anchor="end">¥1,800</text>
+              <text x="26" y="140">餃子</text><text x="214" y="140" text-anchor="end">¥900</text>
+              <text x="26" y="158">ビール × 3</text><text x="214" y="158" text-anchor="end">¥2,400</text>
+              <text x="26" y="176">日本酒</text><text x="214" y="176" text-anchor="end">¥2,800</text>
+              <text x="26" y="194">水</text><text x="214" y="194" text-anchor="end">¥600</text>
+              <text x="26" y="212">お通し × 3</text><text x="214" y="212" text-anchor="end">¥900</text>
+            </g>
+            <line x1="26" y1="228" x2="214" y2="228" stroke="#888" stroke-width="0.6"/>
+            <text x="26" y="250" font-size="11" font-weight="600" fill="#2A2A28">合計</text>
+            <text x="214" y="250" text-anchor="end" font-size="12" font-weight="600" fill="#2A2A28">¥14,100</text>
+            <text x="120" y="275" font-size="8" text-anchor="middle" fill="#999">ありがとうございました</text>
+          </svg>
+        </div>
+        <div class="voice voice-editable">
+          <div class="voice-label">Voice note · transcribed · tap to edit</div>
+          <div class="voice-text" contenteditable="true" id="voice-transcript">"Julia had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."</div>
+        </div>
+      </div>
+
+      <!-- SCENE 6: AGENTS (was 4) -->
+      <div class="scene" data-scene="6">
+        <h2>travel buddy is working</h2>
+        <p class="sub">Orchestrator fanning out to six specialist agents.</p>
+        <div class="orch">
+          <div class="orch-label">Orchestrator</div>
+          <div class="orch-name">Claude on AWS Bedrock</div>
+        </div>
+        <div class="agents">
+          <div class="agent" data-agent="0"><div class="agent-name">Vision</div><div class="agent-sub">OCR, layout</div></div>
+          <div class="agent" data-agent="1"><div class="agent-name">Translate</div><div class="agent-sub">JP → EN</div></div>
+          <div class="agent" data-agent="2"><div class="agent-name">FX</div><div class="agent-sub">JPY → EUR</div></div>
+          <div class="agent" data-agent="3"><div class="agent-name">Group</div><div class="agent-sub">Tricount</div></div>
+          <div class="agent" data-agent="4"><div class="agent-name">Split</div><div class="agent-sub">Diner math</div></div>
+          <div class="agent" data-agent="5"><div class="agent-name">Payment</div><div class="agent-sub">bunq + link</div></div>
+        </div>
+        <div class="status-line" id="status-line">Reading the receipt...</div>
+      </div>
+
+      <!-- SCENE 7: SPLIT (was 5) -->
+      <div class="scene" data-scene="7">
+        <h2>Split ready</h2>
+
+        <!-- total bar — big number, instant context -->
+        <div class="split-total-bar" style="margin-bottom:4px">
+          <div>
+            <div class="split-total-label">Total</div>
+            <div class="split-total-amt">€88.13</div>
+          </div>
+          <div style="text-align:right">
+            <div class="split-total-sub">¥14,100</div>
+            <div class="split-total-sub">1 EUR = 160.01 JPY</div>
+          </div>
+        </div>
+        <p class="sub" style="margin-bottom:14px">Tap a person to review the message before sending.</p>
+
+        <!-- JULIA -->
+        <div class="split-row" id="row-julia">
+          <div class="split-row-head" onclick="toggleDraw('draw-julia')">
+            <div class="avatar av-coral">J</div>
+            <div class="split-row-info">
+              <div class="split-row-name">Julia</div>
+              <div class="split-row-sub">Ate · skipped drinks · bunq user</div>
+            </div>
+            <div class="split-row-right">
+              <div class="split-row-eur">€23.13</div>
+              <div class="split-row-jpy">¥3,700</div>
+            </div>
+            <button class="split-row-action act-bunq" id="btn-julia"
+              onclick="event.stopPropagation(); payJulia()">
+              Request
+            </button>
+            <svg class="split-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
+          </div>
+          <div class="split-drawer" id="draw-julia">
+            <div class="split-drawer-inner">
+              <div>
+                <div class="drawer-msg-label">Message Julia will see</div>
+                <div class="drawer-msg-text" contenteditable="true">"Hi Julia, €23.13 for the izakaya tonight. You had sashimi + yakitori, no drinks 🍶"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MARCO -->
+        <div class="split-row" id="row-marco">
+          <div class="split-row-head" onclick="toggleDraw('draw-marco')">
+            <div class="avatar av-teal">M</div>
+            <div class="split-row-info">
+              <div class="split-row-name">Marco</div>
+              <div class="split-row-sub">Drinks only · not on bunq yet</div>
+            </div>
+            <div class="split-row-right">
+              <div class="split-row-eur">€36.25</div>
+              <div class="split-row-jpy">¥5,800</div>
+            </div>
+            <button class="split-row-action act-link"
+              onclick="event.stopPropagation(); toggleDraw('draw-marco')">
+              Send link
+            </button>
+            <svg class="split-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
+          </div>
+          <div class="split-drawer" id="draw-marco">
+            <div class="split-drawer-inner">
+              <div>
+                <div class="drawer-msg-label">Message Marco will see</div>
+                <div class="drawer-msg-text" contenteditable="true">"Hey Marco, €36.25 for the drinks last night — beers, sake, and your share of the cover. Cheers!"</div>
+              </div>
+              <div class="drawer-pay-opts">
+                <div class="drawer-pay-opt recommended" onclick="payMarco('bunq')">
+                  <div class="drawer-pay-opt-left">
+                    <div class="drawer-pay-opt-name"><span class="bunq-wordmark">bunq</span> link</div>
+                    <div class="drawer-pay-opt-meta">Instant · fee-free · invites Marco to bunq</div>
+                  </div>
+                  <span class="drawer-rec-badge">Recommended</span>
+                </div>
+                <div class="drawer-pay-opt" onclick="payMarco('other')">
+                  <div class="drawer-pay-opt-left">
+                    <div class="drawer-pay-opt-name">Other payment method</div>
+                    <div class="drawer-pay-opt-meta">Slower · fees may apply</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- YOU -->
+        <div class="split-row no-action">
+          <div class="split-row-head">
+            <div class="avatar">U</div>
+            <div class="split-row-info">
+              <div class="split-row-name">You</div>
+              <div class="split-row-sub">Paid at the table</div>
+            </div>
+            <div class="split-row-right">
+              <div class="split-row-eur">€28.75</div>
+              <div class="split-row-jpy">¥4,600</div>
+            </div>
+            <div class="you-badge">Paid ✓</div>
+          </div>
+        </div>
+
+        <div class="split-total-row">
+          <span class="split-total-row-label">Total</span>
+          <span class="split-total-row-amt">¥14,100 · €88.13</span>
+        </div>
+
+        <div class="chat-dock">
+          <div class="chat-thread" id="chat-thread-split"></div>
+          <div class="chat-suggestions">
+            <span class="chat-sug" onclick="askAssistant('Add Ana to the split')">Add Ana to the split</span>
+            <span class="chat-sug" onclick="askAssistant('What if Marco pays in USD?')">Marco pays in USD?</span>
+            <span class="chat-sug" onclick="askAssistant('Round everyone up to nearest euro')">Round to nearest €</span>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" class="chat-input" placeholder="Ask travel buddy about this split..." onkeydown="if(event.key==='Enter') handleChatEnter(event, 'split')"/>
+            <button class="chat-send" onclick="handleChatEnter({target: this.previousElementSibling}, 'split')">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 8: SETTLED (was 6) -->
+      <div class="scene" data-scene="8">
+
+        <!-- hero moment — generous space, nothing competing -->
+        <div class="settled-hero">
+          <div class="settled-ring">
+            <svg width="36" height="36" viewBox="0 0 36 36">
+              <path d="M9 18 L15 24 L27 12" fill="none" stroke="#1DB87A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="settled-title">All settled</div>
+          <p class="settled-sub" id="success-sub">Request sent to Julia · link sent to Marco</p>
+          <div class="req-id" id="req-id" style="display:none"></div>
+        </div>
+
+        <!-- quiet summary strip — 3 facts, no cards -->
+        <div class="settled-strip">
+          <div class="settled-strip-item">
+            <div class="settled-strip-val">€88.13</div>
+            <div class="settled-strip-key">Total</div>
+          </div>
+          <div class="settled-strip-divider"></div>
+          <div class="settled-strip-item">
+            <div class="settled-strip-val">3</div>
+            <div class="settled-strip-key">People</div>
+          </div>
+          <div class="settled-strip-divider"></div>
+          <div class="settled-strip-item">
+            <div class="settled-strip-val">Tricount</div>
+            <div class="settled-strip-key">Logged</div>
+          </div>
+        </div>
+
+        <!-- inline detail chips — tap to expand, collapsed by default -->
+        <div class="settled-chips">
+
+          <div class="settled-chip-row" onclick="toggleSettledChip('chip-marco')">
+            <div class="settled-chip-left">
+              <div class="settled-chip-dot" style="background:var(--amber)"></div>
+              <span class="settled-chip-label">Marco hasn't paid yet — nudge in 3 days</span>
+            </div>
+            <svg class="settled-chip-chevron" id="chev-marco" width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
+          </div>
+          <div class="settled-chip-detail" id="chip-marco">
+            <div class="settled-chip-detail-inner">
+              "Hi Marco — friendly reminder about €36.25 from the Tokyo izakaya. <span style="color:var(--bunq);font-weight:600">Tap to pay or get bunq in 2 min.</span>"
+            </div>
+          </div>
+
+          <div class="settled-chip-row" onclick="toggleSettledChip('chip-trees')">
+            <div class="settled-chip-left">
+              <div class="settled-chip-dot" style="background:var(--success)"></div>
+              <span class="settled-chip-label">This trip plants 2 trees · 47 of 60 this year</span>
+            </div>
+            <svg class="settled-chip-chevron" id="chev-trees" width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
+          </div>
+          <div class="settled-chip-detail" id="chip-trees">
+            <div class="settled-chip-detail-inner">
+              <div class="settled-tree-bar">
+                <div class="settled-tree-fill"></div>
+              </div>
+              <div class="settled-tree-meta">
+                <span>47 trees planted</span><span>Goal: 60</span>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Kenya + Madagascar · bunq × veritree</div>
+            </div>
+          </div>
+
+          <div class="settled-chip-row" onclick="toggleSettledChip('chip-insight')">
+            <div class="settled-chip-left">
+              <div class="settled-chip-dot" style="background:var(--bunq)"></div>
+              <span class="settled-chip-label">AI recognised 7 of 8 items · 1 note</span>
+            </div>
+            <svg class="settled-chip-chevron" id="chev-insight" width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
+          </div>
+          <div class="settled-chip-detail" id="chip-insight">
+            <div class="settled-chip-detail-inner">
+              The bill included <strong>お通し × 3</strong> (¥900) — a Japanese seat-charge not on the menu. Split 3 ways automatically.
+              <div class="memory-detail-prompt" style="margin-top:8px" onclick="askAssistant('Why do izakayas charge for otoshi?'); event.stopPropagation();">Ask · "Why do izakayas charge for otoshi?"</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- chat dock — the main differentiator -->
+        <div class="chat-dock">
+          <div class="chat-thread" id="chat-thread-paid"></div>
+          <div class="chat-suggestions">
+            <span class="chat-sug" onclick="askAssistant('Export this trip as a PDF')">Export as PDF</span>
+            <span class="chat-sug" onclick="askAssistant('Show me my Tokyo food spending')">Food spending</span>
+            <span class="chat-sug" onclick="askAssistant('Cancel the reminder for Marco')">Cancel nudge</span>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" class="chat-input" placeholder="Ask travel buddy anything..." onkeydown="if(event.key==='Enter') handleChatEnter(event, 'paid')"/>
+            <button class="chat-send" onclick="handleChatEnter({target: this.previousElementSibling}, 'paid')">Send</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /scene-wrap -->
+
+    <div class="footer">
+      <div class="footer-row">
+        <button class="btn btn-ghost" id="btn-back" style="display:none" onclick="goBack()">Back</button>
+        <button class="btn" id="btn">Snap the menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const PROXY_BASE = window.location.origin.startsWith('http') ? '' : 'http://localhost:3000';
+  let live = false;
+  const SCENE_COUNT = 9;
+
+  const scenes  = document.querySelectorAll('.scene');
+  const btn     = document.getElementById('btn');
+  const btnBack = document.getElementById('btn-back');
+  const pill    = document.getElementById('pill');
+
+  const labels = [
+    'Choose what to scan',   // 0
+    'Snap the menu',         // 1 — hidden (mode cards drive it)
+    'Later, snap the bill',  // 2 camera-menu — hidden (shutter drives it)
+    'Split after the meal',  // 3 menu translated → goes to agents
+    'See the agents work',   // 4 camera-bill — hidden (shutter drives it)
+    'Let travel buddy handle it',    // 5 capture
+    'See the split',         // 6 agents
+    'Mark as settled',       // 7 split
+    'Restart demo'           // 8 settled
+  ];
+  const pills = [
+    'Tokyo', 'What do you need?', 'Scan menu', 'Menu', 'Scan bill', 'Captured', 'Working', 'Split ready', 'Settled'
+  ];
+  const statusLines = [
+    'Reading the receipt...', 'Translating from Japanese...',
+    'Converting ¥ to €...', 'Resolving Julia and Marco...',
+    'Calculating per-diner amounts...', 'Preparing payment requests...'
+  ];
+  let current = 0;
+
+  let activePath = 'bill'; // 'menu' or 'bill' — set by pickMode
+
+  // Mode pick — menu goes to camera-menu (2), bill goes to camera-bill (4)
+  window.pickMode = function(mode) {
+    activePath = mode;
+    if (mode === 'menu') { current = 2; show(2, 1); }
+    else                 { current = 4; show(4, 1); }
+  };
+
+  window.goBack = function() {
+    if (current === 6 && activePath === 'menu') {
+      // agents reached via menu path — go back to menu scene, not bill capture
+      current = 3; show(3, -1);
+    } else if (current > 0) {
+      current--; show(current, -1);
+    }
+  };
+
+  // ── CAMERA: MENU ──────────────────────────────────────────
+  window.shootMenu = function() {
+    const shutter  = document.getElementById('menu-shutter');
+    const flash    = document.getElementById('menu-flash');
+    const scanline = document.getElementById('menu-scanline');
+    if (!shutter || shutter.disabled) return;
+    shutter.disabled = true;
+
+    // flash
+    flash.classList.add('flash-go');
+    // scanline sweep
+    scanline.classList.add('scan-go');
+
+    setTimeout(() => {
+      flash.classList.remove('flash-go');
+      scanline.classList.remove('scan-go');
+      current = 3; show(3, 1);
+      shutter.disabled = false;
+    }, 900);
+  };
+
+  // ── CAMERA: BILL ──────────────────────────────────────────
+  window.shootBill = function() {
+    const shutter  = document.getElementById('bill-shutter');
+    const flash    = document.getElementById('bill-flash');
+    const scanline = document.getElementById('bill-scanline');
+    if (!shutter || shutter.disabled) return;
+    shutter.disabled = true;
+
+    flash.classList.add('flash-go');
+    scanline.classList.add('scan-go');
+
+    setTimeout(() => {
+      flash.classList.remove('flash-go');
+      scanline.classList.remove('scan-go');
+      current = 5; show(5, 1);
+      shutter.disabled = false;
+    }, 900);
+  };
+
+  // ── VOICE RECORDING ───────────────────────────────────────
+  const TRANSCRIPT_BILL = '"Julia had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."';
+  const TRANSCRIPT_MENU = '"Julia will have the sashimi platter and yakitori. Marco wants the beers and sake. I\'ll have the fried chicken and dumplings."';
+  let recording = false;
+  let recTimer  = null;
+
+  function runTypewriter(text, previewEl, barsEl, btnEl, labelEl, onDone) {
+    btnEl.classList.add('recording');
+    labelEl.textContent = 'Recording...';
+    previewEl.textContent = '';
+    barsEl.innerHTML = Array.from({length: 20}, () =>
+      `<div class="wbar" style="height:${4 + Math.random()*24}px;animation-delay:${Math.random()*0.4}s"></div>`
+    ).join('');
+    let i = 0;
+    recTimer = setInterval(() => {
+      previewEl.textContent = text.slice(0, ++i);
+      if (i >= text.length) {
+        clearInterval(recTimer);
+        setTimeout(() => {
+          recording = false;
+          btnEl.classList.remove('recording');
+          labelEl.textContent = 'Recorded ✓';
+          barsEl.innerHTML = '';
+          if (onDone) onDone();
+        }, 380);
+      }
+    }, 36);
+  }
+
+  window.startRecording = function() {
+    if (recording) return;
+    recording = true;
+    runTypewriter(
+      TRANSCRIPT_BILL,
+      document.getElementById('voice-preview'),
+      document.getElementById('waveform-bars'),
+      document.getElementById('record-btn'),
+      document.getElementById('record-label'),
+      () => {
+        const t = document.getElementById('voice-transcript');
+        if (t) t.textContent = TRANSCRIPT_BILL;
+      }
+    );
+  };
+
+  window.startRecordingMenu = function() {
+    if (recording) return;
+    recording = true;
+    runTypewriter(
+      TRANSCRIPT_MENU,
+      document.getElementById('voice-preview-menu'),
+      document.getElementById('waveform-bars-menu'),
+      document.getElementById('record-btn-menu'),
+      document.getElementById('record-label-menu'),
+      null
+    );
+  };
+
+  async function checkProxy() {
+    const banner = document.getElementById('live-banner');
+    const text   = document.getElementById('live-text');
+    try {
+      const res  = await fetch(PROXY_BASE + '/health', { method: 'GET' });
+      const data = await res.json();
+      if (data.ok) {
+        live = true;
+        banner.classList.replace('mock','live');
+        const chatBadge = data.chatLive ? ' · chat live' : ' · chat scripted';
+        text.innerHTML = `Live · connected to <span class="bunq-wordmark">bunq</span> sandbox · ${data.balance.currency} ${data.balance.value}${chatBadge}`;
+        const bc = document.getElementById('balance-card');
+        if (bc) {
+          bc.style.display = 'block';
+          document.getElementById('balance-val').textContent = `${data.balance.currency} ${data.balance.value}`;
+          document.getElementById('balance-sub').textContent = data.accountDesc || `Account #${data.accountId}`;
+        }
+      } else throw new Error('not ready');
+    } catch(e) {
+      live = false;
+      banner.classList.replace('live','mock');
+      text.innerHTML = 'Mock mode · <span class="bunq-wordmark">bunq</span> proxy not reachable';
+    }
+  }
+
+  function show(n, direction) {
+    // direction: 1 = forward, -1 = back
+    const outClass = direction >= 0 ? 'exit-left' : '';
+    scenes.forEach((s, i) => {
+      if (i === n) {
+        s.classList.remove('exit-left');
+        // small rAF to trigger transition from initial translate state
+        requestAnimationFrame(() => {
+          if (direction < 0) s.style.transform = 'translateX(-28px)';
+          else               s.style.transform = 'translateX(28px)';
+          s.style.opacity = '0';
+          s.classList.add('active');
+          requestAnimationFrame(() => {
+            s.style.transform = '';
+            s.style.opacity   = '';
+          });
+        });
+      } else if (s.classList.contains('active')) {
+        s.style.transform = direction >= 0 ? 'translateX(-28px)' : 'translateX(28px)';
+        s.style.opacity   = '0';
+        setTimeout(() => {
+          s.classList.remove('active');
+          s.style.transform = '';
+          s.style.opacity   = '';
+        }, 320);
+      }
+    });
+
+    btn.textContent        = labels[n] || labels[0];
+    pill.textContent       = pills[n]  || pills[0];
+    // hide back on scene 0, scene 1 (cards drive it), and final scene
+    btnBack.style.display  = (n > 1 && n < SCENE_COUNT - 1) ? 'inline-flex' : 'none';
+    // hide main CTA on mode-pick scene (1) and both camera scenes (2,4) — buttons drive those
+    btn.style.display      = (n === 1 || n === 2 || n === 4) ? 'none' : 'flex';
+    if (n === 6) runAgents();
+  }
+
+
+  function runAgents() {
+    const agentEls = document.querySelectorAll('.agent');
+    const status   = document.getElementById('status-line');
+    agentEls.forEach(a => a.classList.remove('active','done'));
+    if (status) status.textContent = statusLines[0];
+    agentEls.forEach((a, i) => {
+      setTimeout(() => { a.classList.add('active'); if (status) status.textContent = statusLines[i]; }, i * 500);
+      setTimeout(() => { a.classList.remove('active'); a.classList.add('done'); }, i * 500 + 420);
+    });
+    setTimeout(() => { if (status) status.textContent = 'All done — tap to see the split.'; }, agentEls.length * 500 + 200);
+  }
+
+  btn.addEventListener('click', () => {
+    // Scene 3 (menu path) skips bill capture entirely — goes straight to agents
+    if (current === 3) { current = 6; show(6, 1); return; }
+    current = (current + 1) % SCENE_COUNT;
+    show(current, 1);
+  });
+
+  window.payJulia = async function() {
+    const b    = document.getElementById('btn-julia');
+    const sub  = document.getElementById('success-sub');
+    const reqEl = document.getElementById('req-id');
+    const tKv   = document.getElementById('tricount-kv');
+    const tVal  = document.getElementById('tricount-val');
+
+    if (live) {
+      b.disabled = true;
+      b.textContent = 'Sending via bunq...';
+      try {
+        const res  = await fetch(PROXY_BASE + '/request-money', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: '23.13', currency: 'EUR', email: 'julia.demo@bunq.com', description: 'Izakaya Sakura — Julia share' })
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          sub.innerHTML = `Real bunq request-inquiry created for €${data.amount}.<br>Marco's payment link is on its way.`;
+          reqEl.textContent   = `request-inquiry id: ${data.requestId}`;
+          reqEl.style.display = 'inline-block';
+          if (tKv) tKv.textContent = 'Live bunq + Tricount';
+          if (tVal) tVal.textContent = `request-inquiry #${data.requestId} · €88.13 logged`;
+        } else throw new Error(data.error || 'request failed');
+      } catch(e) {
+        console.warn('Live request failed:', e.message);
+        sub.innerHTML = `Julia sent €23.13 via bunq — instant.<br>Payment link sent to Marco.`;
+      }
+      b.disabled = false;
+    }
+    current = 8; show(8, 1);
+  };
+
+  window.payMarco = function(method) {
+    const sub = document.getElementById('success-sub');
+    if (sub) {
+      sub.innerHTML = method === 'bunq'
+        ? 'Julia sent €23.13 via <span class="bunq-wordmark">bunq</span> — instant.<br><span class="bunq-wordmark">bunq</span> link sent to Marco with a 2-minute sign-up.'
+        : 'Julia sent €23.13 via <span class="bunq-wordmark">bunq</span> — instant.<br>Payment link sent via an external provider (1–2 days, fees applied).';
+    }
+    current = 8; show(8, 1);
+  };
+
+  window.toggleSettledChip = function(id) {
+    const detail = document.getElementById(id);
+    if (!detail) return;
+    const chevId = id.replace('chip-', 'chev-');
+    const chev   = document.getElementById(chevId);
+    const isOpen = detail.classList.contains('open');
+    // close all
+    document.querySelectorAll('.settled-chip-detail.open').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.settled-chip-chevron.open').forEach(c => c.classList.remove('open'));
+    // open this one unless it was already open
+    if (!isOpen) {
+      detail.classList.add('open');
+      if (chev) chev.classList.add('open');
+    }
+  };
+
+  window.toggleMemoryDetail = function() {
+    document.getElementById('memory-detail')?.classList.toggle('open');
+  };
+
+  window.toggleDraw = function(id) {
+    const drawer = document.getElementById(id);
+    if (!drawer) return;
+    const isOpen = drawer.classList.contains('open');
+    // close all drawers first
+    document.querySelectorAll('.split-drawer.open').forEach(d => d.classList.remove('open'));
+    // open this one unless it was already open
+    if (!isOpen) drawer.classList.add('open');
+  };
+
+  const scriptedAnswers = {
+    'Why do izakayas charge for otoshi?': 'お通し (otoshi) is a small appetizer automatically served when you sit down — it doubles as a cover charge, typically 300–900¥ per person. Refusing it is technically possible but considered rude.',
+    'Add Ana to the split': 'Ana wasn\'t at the izakaya tonight — I didn\'t include her. Want me to message her anyway and split €88.13 four ways (€22.03 each)?',
+    'What if Marco pays in USD?': 'Marco\'s share is €36.25 ≈ $39.13 at today\'s rate. The bunq link auto-detects his currency. Other providers convert at their own (typically worse) rates.',
+    'Round everyone up to nearest euro': 'Rounded: Julia €24, Marco €37, you €29. The extra €1.62 goes into your Tokyo trip pot.',
+    'Export this trip as a PDF': 'I\'ll compile the Tokyo trip (7 expenses, €431 total) as a PDF. Ready in 10 seconds — sent to your bunq inbox.',
+    'Show me my Tokyo food spending': 'Food so far this trip: €267.40 across 5 meals. Average €53.50/meal. The izakaya tonight was your 2nd highest.',
+    'Cancel the reminder for Marco': 'Reminder canceled. Marco won\'t get a nudge. I\'ll still notify you if the payment link is opened.'
+  };
+
+  window.askAssistant = async function(question) {
+    const activeScene = document.querySelector('.scene.active');
+    if (!activeScene) return;
+    const threadId = activeScene.dataset.scene === '8' ? 'chat-thread-paid' : 'chat-thread-split';
+    const thread   = document.getElementById(threadId);
+    if (!thread) return;
+
+    const userBubble = document.createElement('div');
+    userBubble.className   = 'chat-msg chat-msg-user';
+    userBubble.textContent = question;
+    thread.appendChild(userBubble);
+
+    const typing = document.createElement('div');
+    typing.className   = 'chat-msg chat-msg-bot chat-typing';
+    typing.textContent = 'Thinking...';
+    thread.appendChild(typing);
+    thread.scrollTop = thread.scrollHeight;
+
+    let reply = null;
+    try {
+      const res  = await fetch(PROXY_BASE + '/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.reply) reply = data.reply;
+    } catch (e) {
+      console.warn('[chat] live call failed, using scripted fallback:', e.message);
+    }
+
+    if (!reply) {
+      reply = scriptedAnswers[question] || 'Let me look into that — it would route through the Group and Split agents. (Live chat unavailable; ANTHROPIC_API_KEY not configured in the proxy.)';
+    }
+
+    typing.remove();
+    const botBubble = document.createElement('div');
+    botBubble.className   = 'chat-msg chat-msg-bot';
+    botBubble.textContent = reply;
+    thread.appendChild(botBubble);
+    thread.scrollTop = thread.scrollHeight;
+  };
+
+  window.handleChatEnter = function(e, where) {
+    const input = e.target;
+    const q = input.value.trim();
+    if (!q) return;
+    input.value = '';
+    askAssistant(q);
+  };
+
+  checkProxy();
+  show(0, 1);
+})();
+</script>
+</body>
+</html>

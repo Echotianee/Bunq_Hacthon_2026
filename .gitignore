@@ -1,3 +1,4 @@
+.env
 bunq-keys.json
 bunq-context.json
 .DS_Store

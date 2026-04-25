@@ -4,13 +4,62 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
+function loadEnvFile() {
+  const envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return;
+  const content = fs.readFileSync(envPath, 'utf8');
+  for (const rawLine of content.split('\n')) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+    const eq = line.indexOf('=');
+    if (eq === -1) continue;
+    const key = line.slice(0, eq).trim();
+    let val = line.slice(eq + 1).trim();
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      val = val.slice(1, -1);
+    }
+    if (!process.env[key]) process.env[key] = val;
+  }
+}
+loadEnvFile();
+
 const API_KEY = process.env.BUNQ_API_KEY || '';
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
 const API_HOST = 'public-api.sandbox.bunq.com';
 const PORT = 3000;
 
 const KEYS_FILE = path.join(__dirname, 'bunq-keys.json');
 const CONTEXT_FILE = path.join(__dirname, 'bunq-context.json');
-const HTML_FILE = path.join(__dirname, 'finn-abroad-live.html');
+const HTML_FILE = path.join(__dirname, 'travel-buddy.html');
+
+const SYSTEM_PROMPT = `You are travel buddy, an AI assistant inside the bunq travel banking app. You help travelers with money, splits, and trip context.
+
+CURRENT TRIP CONTEXT:
+- Location: Tokyo, day 2 of 6
+- Restaurant just settled: Izakaya Sakura, Shibuya
+- Bill total: \u00a514,100 \u2248 \u20ac88.13 (1 EUR = 160.01 JPY)
+- Diners: the user, Julia (bunq user, ate but skipped drinks), Marco (not on bunq, drinks only)
+- Items ordered: karaage \u00a51,200, sashimi platter \u00a53,500, yakitori 6 skewers \u00a51,800, gyoza \u00a5900, beer x 3 \u00a52,400, sake bottle \u00a52,800, water \u00a5600, otoshi/cover charge x 3 \u00a5900
+- Voice instruction was: "Julia didn't drink, Marco only had drinks, split the food with me"
+- Final split: Julia \u20ac23.13, Marco \u20ac36.25, user \u20ac28.75
+- Status: real bunq request sent to Julia, payment link sent to Marco
+- Travel buddies the user splits with often: Julia (12 splits, bunq), Marco (8 splits, external link), Ana (5 splits, bunq)
+- Recent trips logged: Lisbon \u20ac142.30, Bali \u20ac438.00, Paris \u20ac88.50
+- This trip plants 2 trees via bunq's veritree partnership
+
+ABOUT TRAVEL BUDDY:
+- A multi-agent assistant inside bunq, built on Claude via Amazon Bedrock
+- Specialist agents: Vision (OCR), Translate (38 languages), FX (live rates), Group (Tricount contacts), Split (per-diner math), Payment (bunq + universal link)
+- Tricount is bunq's bill-splitting product; group memory comes from there
+- bunq is always written lowercase
+- bunq is the EU bank built for digital nomads
+
+YOUR STYLE:
+- Concise: 1-3 sentences unless the question genuinely needs more
+- Warm but efficient, like a smart friend who's done this many times
+- Use both \u00a5 and \u20ac when relevant; be precise with numbers
+- Stay on topic \u2014 travel, spending, this trip, bunq features. If asked something unrelated, gently redirect
+- Don't invent data. If asked for info you don't have, say so plainly`;
 
 function loadOrCreateKeys() {
   if (fs.existsSync(KEYS_FILE)) {
@@ -38,12 +87,12 @@ function saveContext(ctx) {
   fs.writeFileSync(CONTEXT_FILE, JSON.stringify(ctx, null, 2));
 }
 
-function apiRequest({ method, reqPath, body, authToken, privateKey, sign }) {
+function bunqRequest({ method, reqPath, body, authToken, privateKey, sign }) {
   const bodyStr = body ? JSON.stringify(body) : '';
   const headers = {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-cache',
-    'User-Agent': 'finn-abroad-demo/1.0',
+    'User-Agent': 'travel-buddy-demo/1.0',
     'X-Bunq-Language': 'en_US',
     'X-Bunq-Region': 'nl_NL',
     'X-Bunq-Client-Request-Id': crypto.randomUUID(),
@@ -79,13 +128,54 @@ function apiRequest({ method, reqPath, body, authToken, privateKey, sign }) {
   });
 }
 
+function anthropicRequest(messages) {
+  const body = JSON.stringify({
+    model: 'claude-haiku-4-5',
+    max_tokens: 250,
+    system: SYSTEM_PROMPT,
+    messages,
+  });
+  return new Promise((resolve, reject) => {
+    const req = https.request({
+      hostname: 'api.anthropic.com',
+      port: 443,
+      path: '/v1/messages',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'Content-Length': Buffer.byteLength(body),
+      },
+    }, (res) => {
+      let data = '';
+      res.on('data', (c) => (data += c));
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (res.statusCode >= 400) {
+            reject(new Error(`${res.statusCode}: ${data}`));
+          } else {
+            resolve(parsed);
+          }
+        } catch (e) {
+          reject(new Error(`Parse error: ${data}`));
+        }
+      });
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
+  });
+}
+
 async function setupContext() {
   const keys = loadOrCreateKeys();
   const ctx = loadContext();
 
   if (!ctx.installationToken) {
     console.log('[bunq] Creating installation...');
-    const res = await apiRequest({
+    const res = await bunqRequest({
       method: 'POST',
       reqPath: '/v1/installation',
       body: { client_public_key: keys.publicKey },
@@ -101,11 +191,11 @@ async function setupContext() {
 
   if (!ctx.deviceRegistered) {
     console.log('[bunq] Registering device-server...');
-    await apiRequest({
+    await bunqRequest({
       method: 'POST',
       reqPath: '/v1/device-server',
       body: {
-        description: 'Finn Abroad hackathon demo',
+        description: 'travel buddy hackathon demo',
         secret: API_KEY,
         permitted_ips: ['*'],
       },
@@ -119,7 +209,7 @@ async function setupContext() {
   }
 
   console.log('[bunq] Starting fresh session-server...');
-  const sess = await apiRequest({
+  const sess = await bunqRequest({
     method: 'POST',
     reqPath: '/v1/session-server',
     body: { secret: API_KEY },
@@ -138,7 +228,7 @@ async function setupContext() {
   console.log(`[bunq] Session ok. User ID: ${ctx.userId}`);
 
   console.log('[bunq] Fetching monetary accounts...');
-  const accRes = await apiRequest({
+  const accRes = await bunqRequest({
     method: 'GET',
     reqPath: `/v1/user/${ctx.userId}/monetary-account`,
     authToken: ctx.sessionToken,
@@ -166,7 +256,7 @@ async function createRequestInquiry({ ctx, keys, amount, currency, email, descri
     description: description,
     allow_bunqme: true,
   };
-  const res = await apiRequest({
+  const res = await bunqRequest({
     method: 'POST',
     reqPath: `/v1/user/${ctx.userId}/monetary-account/${ctx.accountId}/request-inquiry`,
     body,
@@ -181,14 +271,22 @@ async function createRequestInquiry({ ctx, keys, amount, currency, email, descri
 let state = null;
 
 async function main() {
-  console.log('Booting Finn Abroad bunq proxy...');
+  console.log('Booting travel buddy proxy...');
+  if (!API_KEY) {
+    console.warn('[bunq] BUNQ_API_KEY not set — bunq endpoints will fail. Add it to .env.');
+  }
+  if (!ANTHROPIC_KEY) {
+    console.warn('[anthropic] ANTHROPIC_API_KEY not set — /chat will use scripted fallback only.');
+  } else {
+    console.log('[anthropic] ANTHROPIC_API_KEY found — /chat live.');
+  }
   try {
     state = await setupContext();
     console.log(`[bunq] READY — balance ${state.ctx.balance.currency} ${state.ctx.balance.value}`);
   } catch (err) {
     console.error('[bunq] Setup FAILED:', err.message);
     console.error('[bunq] Server will start anyway; /request-money will return 503.');
-    console.error('[bunq] If the sandbox reset, delete bunq-context.json and restart.');
+    console.error('[bunq] If the sandbox reset, delete bunq-context.json and bunq-keys.json and restart.');
   }
 
   const server = http.createServer(async (req, res) => {
@@ -203,7 +301,7 @@ async function main() {
         fs.createReadStream(HTML_FILE).pipe(res);
       } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('finn-abroad-live.html not found next to bunq-proxy.js');
+        res.end('travel-buddy.html not found next to bunq-proxy.js');
       }
       return;
     }
@@ -212,6 +310,7 @@ async function main() {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         ok: !!state,
+        chatLive: !!ANTHROPIC_KEY,
         userId: state?.ctx.userId || null,
         accountId: state?.ctx.accountId || null,
         accountDesc: state?.ctx.accountDesc || null,
@@ -249,12 +348,46 @@ async function main() {
       return;
     }
 
+    if (req.method === 'POST' && req.url === '/chat') {
+      if (!ANTHROPIC_KEY) {
+        res.writeHead(503, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'ANTHROPIC_API_KEY not set' }));
+        return;
+      }
+      let body = '';
+      req.on('data', (c) => (body += c));
+      req.on('end', async () => {
+        try {
+          const input = JSON.parse(body || '{}');
+          const messages = input.messages || (input.question ? [{ role: 'user', content: input.question }] : []);
+          if (!messages.length) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'no messages or question provided' }));
+            return;
+          }
+          const last = messages[messages.length - 1];
+          const lastText = typeof last.content === 'string' ? last.content : '';
+          console.log(`[anthropic] chat: "${lastText.slice(0, 80)}"`);
+          const result = await anthropicRequest(messages);
+          const reply = result.content?.find?.(b => b.type === 'text')?.text || '';
+          console.log(`[anthropic] reply: "${reply.slice(0, 80)}..."`);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: true, reply }));
+        } catch (err) {
+          console.error('[anthropic] chat failed:', err.message);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+      return;
+    }
+
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not found');
   });
 
   server.listen(PORT, () => {
-    console.log(`\n  Proxy + demo live at:  http://localhost:${PORT}`);
+    console.log(`\n  Demo + proxy live at:  http://localhost:${PORT}`);
     console.log(`  Health check:          http://localhost:${PORT}/health`);
     console.log(`  Press Ctrl+C to stop.\n`);
   });
