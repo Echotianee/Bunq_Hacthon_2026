@@ -3,6 +3,8 @@ const https = require('https');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const { execSync } = require('child_process');
 
 function loadEnvFile() {
   const envPath = path.join(__dirname, '.env');
@@ -25,12 +27,41 @@ loadEnvFile();
 
 const API_KEY = process.env.BUNQ_API_KEY || '';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
-const API_HOST = 'public-api.sandbox.bunq.com';
-const PORT = 3000;
+const API_HOST   = 'public-api.sandbox.bunq.com';
+const PORT       = 3000;
+const PORT_HTTPS = 3001;
 
-const KEYS_FILE = path.join(__dirname, 'bunq-keys.json');
+const KEYS_FILE    = path.join(__dirname, 'bunq-keys.json');
 const CONTEXT_FILE = path.join(__dirname, 'bunq-context.json');
-const HTML_FILE = path.join(__dirname, 'travel-buddy.html');
+const HTML_FILE    = path.join(__dirname, 'travel-buddy.html');
+const CERT_FILE    = path.join(__dirname, 'cert.pem');
+const KEY_FILE     = path.join(__dirname, 'key.pem');
+
+function getLocalIP() {
+  const ifaces = os.networkInterfaces();
+  for (const name of Object.keys(ifaces)) {
+    for (const iface of ifaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) return iface.address;
+    }
+  }
+  return 'localhost';
+}
+
+function ensureCert() {
+  if (fs.existsSync(CERT_FILE) && fs.existsSync(KEY_FILE)) return true;
+  console.log('[https] Generating self-signed cert...');
+  try {
+    execSync(
+      `openssl req -x509 -newkey rsa:2048 -keyout "${KEY_FILE}" -out "${CERT_FILE}" -days 365 -nodes -subj "/CN=travel-buddy-local"`,
+      { stdio: 'pipe' }
+    );
+    console.log('[https] cert.pem + key.pem created.');
+    return true;
+  } catch (e) {
+    console.warn('[https] openssl unavailable — HTTPS disabled. Install openssl to enable phone camera/mic.');
+    return false;
+  }
+}
 
 const SYSTEM_PROMPT = `You are travel buddy, an AI assistant inside the bunq travel banking app. You help travelers with money, splits, and trip context.
 
@@ -272,124 +303,240 @@ let state = null;
 
 async function main() {
   console.log('Booting travel buddy proxy...');
-  if (!API_KEY) {
-    console.warn('[bunq] BUNQ_API_KEY not set — bunq endpoints will fail. Add it to .env.');
-  }
-  if (!ANTHROPIC_KEY) {
-    console.warn('[anthropic] ANTHROPIC_API_KEY not set — /chat will use scripted fallback only.');
-  } else {
-    console.log('[anthropic] ANTHROPIC_API_KEY found — /chat live.');
-  }
+  if (!API_KEY)        console.warn('[bunq] BUNQ_API_KEY not set — bunq endpoints will fail.');
+  if (!ANTHROPIC_KEY)  console.warn('[anthropic] ANTHROPIC_API_KEY not set — AI features disabled.');
+  else                 console.log('[anthropic] ANTHROPIC_API_KEY found — AI live.');
   try {
     state = await setupContext();
     console.log(`[bunq] READY — balance ${state.ctx.balance.currency} ${state.ctx.balance.value}`);
   } catch (err) {
     console.error('[bunq] Setup FAILED:', err.message);
-    console.error('[bunq] Server will start anyway; /request-money will return 503.');
-    console.error('[bunq] If the sandbox reset, delete bunq-context.json and bunq-keys.json and restart.');
+    console.error('[bunq] Delete bunq-context.json + bunq-keys.json and restart to reset.');
   }
 
-  const server = http.createServer(async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+  const localIP = getLocalIP();
+  const certOk  = ensureCert();
 
-    if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
-      if (fs.existsSync(HTML_FILE)) {
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-        fs.createReadStream(HTML_FILE).pipe(res);
-      } else {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('travel-buddy.html not found next to bunq-proxy.js');
-      }
-      return;
-    }
-
-    if (req.method === 'GET' && req.url === '/health') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        ok: !!state,
-        chatLive: !!ANTHROPIC_KEY,
-        userId: state?.ctx.userId || null,
-        accountId: state?.ctx.accountId || null,
-        accountDesc: state?.ctx.accountDesc || null,
-        balance: state?.ctx.balance || null,
-      }));
-      return;
-    }
-
-    if (req.method === 'POST' && req.url === '/request-money') {
-      if (!state) {
-        res.writeHead(503, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'bunq context not ready' }));
-        return;
-      }
-      let body = '';
-      req.on('data', (c) => (body += c));
-      req.on('end', async () => {
-        try {
-          const input = JSON.parse(body || '{}');
-          const amount = input.amount || '23.13';
-          const currency = input.currency || 'EUR';
-          const email = input.email || 'julia.demo@bunq.com';
-          const description = input.description || 'Izakaya Sakura — Julia share';
-          console.log(`[bunq] Creating request-inquiry: ${currency} ${amount} to ${email}`);
-          const result = await createRequestInquiry({ ctx: state.ctx, keys: state.keys, amount, currency, email, description });
-          console.log(`[bunq] Request created with id ${result.id}`);
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ ok: true, requestId: result.id, amount, currency, email }));
-        } catch (err) {
-          console.error('[bunq] request-money failed:', err.message);
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: err.message }));
-        }
-      });
-      return;
-    }
-
-    if (req.method === 'POST' && req.url === '/chat') {
-      if (!ANTHROPIC_KEY) {
-        res.writeHead(503, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'ANTHROPIC_API_KEY not set' }));
-        return;
-      }
-      let body = '';
-      req.on('data', (c) => (body += c));
-      req.on('end', async () => {
-        try {
-          const input = JSON.parse(body || '{}');
-          const messages = input.messages || (input.question ? [{ role: 'user', content: input.question }] : []);
-          if (!messages.length) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'no messages or question provided' }));
-            return;
-          }
-          const last = messages[messages.length - 1];
-          const lastText = typeof last.content === 'string' ? last.content : '';
-          console.log(`[anthropic] chat: "${lastText.slice(0, 80)}"`);
-          const result = await anthropicRequest(messages);
-          const reply = result.content?.find?.(b => b.type === 'text')?.text || '';
-          console.log(`[anthropic] reply: "${reply.slice(0, 80)}..."`);
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ ok: true, reply }));
-        } catch (err) {
-          console.error('[anthropic] chat failed:', err.message);
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: err.message }));
-        }
-      });
-      return;
-    }
-
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not found');
+  http.createServer(handleRequest).listen(PORT, () => {
+    console.log(`\n  Laptop:  http://localhost:${PORT}`);
   });
 
-  server.listen(PORT, () => {
-    console.log(`\n  Demo + proxy live at:  http://localhost:${PORT}`);
-    console.log(`  Health check:          http://localhost:${PORT}/health`);
-    console.log(`  Press Ctrl+C to stop.\n`);
+  if (certOk && fs.existsSync(CERT_FILE)) {
+    https.createServer(
+      { key: fs.readFileSync(KEY_FILE), cert: fs.readFileSync(CERT_FILE) },
+      handleRequest
+    ).listen(PORT_HTTPS, () => {
+      console.log(`  📱 Phone:  https://${localIP}:${PORT_HTTPS}`);
+      console.log(`  ⚠️  Tap "Advanced → Proceed" on the browser security warning (self-signed cert).\n`);
+    });
+  }
+}
+
+async function handleRequest(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+
+  // ── Serve HTML ──────────────────────────────────────────────
+  if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
+    if (fs.existsSync(HTML_FILE)) {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      fs.createReadStream(HTML_FILE).pipe(res);
+    } else {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('travel-buddy.html not found');
+    }
+    return;
+  }
+
+  // ── Health ──────────────────────────────────────────────────
+  if (req.method === 'GET' && req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      ok: !!state, chatLive: !!ANTHROPIC_KEY,
+      userId: state?.ctx.userId || null,
+      accountId: state?.ctx.accountId || null,
+      accountDesc: state?.ctx.accountDesc || null,
+      balance: state?.ctx.balance || null,
+    }));
+    return;
+  }
+
+  // ── Collect POST body helper ────────────────────────────────
+  function collectBody() {
+    return new Promise(resolve => {
+      let b = '';
+      req.on('data', c => (b += c));
+      req.on('end', () => resolve(b));
+    });
+  }
+
+  // ── /request-money ──────────────────────────────────────────
+  if (req.method === 'POST' && req.url === '/request-money') {
+    if (!state) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'bunq not ready' })); return; }
+    try {
+      const input = JSON.parse(await collectBody() || '{}');
+      const amount   = input.amount || '23.13';
+      const currency = input.currency || 'EUR';
+      const email    = input.email || 'sara.demo@bunq.com';
+      const desc     = input.description || 'Dinner — Sara share';
+      console.log(`[bunq] request-inquiry: ${currency} ${amount} → ${email}`);
+      const result = await createRequestInquiry({ ctx: state.ctx, keys: state.keys, amount, currency, email, description: desc });
+      console.log(`[bunq] created id ${result.id}`);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, requestId: result.id, amount, currency, email }));
+    } catch (err) {
+      console.error('[bunq] request-money failed:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // ── /chat ───────────────────────────────────────────────────
+  if (req.method === 'POST' && req.url === '/chat') {
+    if (!ANTHROPIC_KEY) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'no key' })); return; }
+    try {
+      const input    = JSON.parse(await collectBody() || '{}');
+      const messages = input.messages || (input.question ? [{ role: 'user', content: input.question }] : []);
+      if (!messages.length) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'no messages' })); return; }
+      console.log(`[chat] "${messages.at(-1)?.content?.slice?.(0,80)}"`);
+      const result = await anthropicRequest(messages);
+      const reply  = result.content?.find(b => b.type === 'text')?.text || '';
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, reply }));
+    } catch (err) {
+      console.error('[chat] failed:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // ── /upload-audio ───────────────────────────────────────────
+  if (req.method === 'POST' && req.url === '/upload-audio') {
+    if (!ANTHROPIC_KEY) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'no key' })); return; }
+    try {
+      const input    = JSON.parse(await collectBody() || '{}');
+      const audioB64 = input.audio;
+      const mime     = input.mimeType || 'audio/webm';
+      if (!audioB64) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'no audio' })); return; }
+      console.log(`[audio] transcribing ${Math.round(audioB64.length * 0.75 / 1024)}KB of ${mime}`);
+
+      const body = JSON.stringify({
+        model: 'claude-haiku-4-5', max_tokens: 300,
+        system: 'Transcribe this audio exactly as spoken in English. Return ONLY the transcript — no quotes, no labels. If inaudible: [inaudible]',
+        messages: [{ role: 'user', content: [
+          { type: 'document', source: { type: 'base64', media_type: mime, data: audioB64 } },
+          { type: 'text', text: 'Transcribe this voice note.' },
+        ]}],
+      });
+      const transcript = await callAnthropic(body);
+      console.log(`[audio] → "${transcript.slice(0,100)}"`);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, transcript }));
+    } catch (err) {
+      console.error('[audio] failed:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  // ── /analyze-image ──────────────────────────────────────────
+  if (req.method === 'POST' && req.url === '/analyze-image') {
+    if (!ANTHROPIC_KEY) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'no key' })); return; }
+    try {
+      const input      = JSON.parse(await collectBody() || '{}');
+      const imageB64   = input.image;
+      const transcript = input.transcript || '';
+      const imgMime    = input.mimeType || 'image/jpeg';
+      if (!imageB64) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'no image' })); return; }
+      console.log(`[vision] analyzing ${Math.round(imageB64.length * 0.75 / 1024)}KB image`);
+      console.log(`[vision] voice: "${transcript.slice(0,120)}"`);
+
+      const prompt = `You are analyzing a restaurant bill image plus a voice note to compute a fair split.
+
+Voice note: "${transcript}"
+
+Study the bill carefully. Extract every line item with its original name and price.
+
+Then use the voice note to assign items to each person named. Unmentioned shared items split equally. The last person in the "people" array is always "Alex" (the person who paid at the table — they owe nothing to collect, but their items are listed).
+
+IMPORTANT: Return ONLY valid JSON — no markdown fences, no commentary.
+
+{
+  "restaurant": "name from bill",
+  "detected_language": "e.g. Japanese, Thai, Italian — the language the bill is written in",
+  "bill_currency": "currency symbol exactly as on the bill, e.g. ¥ or ฿ or $ or €",
+  "bill_currency_code": "ISO code e.g. JPY, THB, USD, EUR",
+  "total_bill": 0,
+  "total_bill_eur": 0,
+  "fx_rate": "e.g. 1 EUR = 160 JPY — empty string if bill is already in EUR",
+  "translate_label": "e.g. JP → EN or TH → EN — source language code to EN",
+  "items": [
+    { "name_original": "original text", "name_en": "English name", "price_original": 0, "price_eur": 0, "assigned_to": "person name or shared" }
+  ],
+  "people": [
+    { "name": "Sara", "subtotal_original": 0, "subtotal_eur": 0, "note": "what they had" },
+    { "name": "Marco", "subtotal_original": 0, "subtotal_eur": 0, "note": "what they had" },
+    { "name": "Alex", "subtotal_original": 0, "subtotal_eur": 0, "note": "paid at table" }
+  ],
+  "confidence": "high | medium | low"
+}`;
+
+      const reqBody = JSON.stringify({
+        model: 'claude-sonnet-4-5', max_tokens: 1500,
+        messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: imgMime, data: imageB64 } },
+          { type: 'text', text: prompt },
+        ]}],
+      });
+      const raw   = await callAnthropic(reqBody);
+      const clean = raw.replace(/^```[a-z]*\n?/i, '').replace(/```$/, '').trim();
+      const split = JSON.parse(clean);
+      console.log(`[vision] ${split.detected_language} bill, ${split.bill_currency}${split.total_bill} → €${split.total_bill_eur} | ${split.people?.length} people`);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, split }));
+    } catch (err) {
+      console.error('[vision] failed:', err.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
+  res.writeHead(404, { 'Content-Type': 'text/plain' });
+  res.end('Not found');
+}
+
+// ── Shared Anthropic caller ─────────────────────────────────
+function callAnthropic(bodyStr) {
+  return new Promise((resolve, reject) => {
+    const r = https.request({
+      hostname: 'api.anthropic.com', port: 443, path: '/v1/messages', method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'pdfs-2024-09-25',
+        'Content-Length': Buffer.byteLength(bodyStr),
+      },
+    }, (apiRes) => {
+      let data = '';
+      apiRes.on('data', c => (data += c));
+      apiRes.on('end', () => {
+        try {
+          const p = JSON.parse(data);
+          if (apiRes.statusCode >= 400) return reject(new Error(`${apiRes.statusCode}: ${data}`));
+          resolve((p.content?.find(b => b.type === 'text')?.text || '').trim());
+        } catch (e) { reject(new Error('parse: ' + data)); }
+      });
+    });
+    r.on('error', reject);
+    r.write(bodyStr);
+    r.end();
   });
 }
 

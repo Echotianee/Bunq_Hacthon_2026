@@ -60,10 +60,78 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ── DARK MODE ── */
+  body.dark {
+    --bg: #0D0F14;
+    --bg-dot: rgba(255,255,255,0.04);
+    --surface: #161A24;
+    --surface-2: #1E2330;
+    --surface-3: #252B3A;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.14);
+    --text: #F0F0EE;
+    --text-muted: #9DA3B4;
+    --text-hint: #5C6278;
+    --bunq-pale: rgba(0,166,255,0.12);
+    --bunq-mid: rgba(0,166,255,0.18);
+    --success-bg: rgba(29,184,122,0.12);
+    --success-dark: #4ECFA0;
+    --coral-bg: rgba(224,90,58,0.12);
+    --amber-bg: rgba(196,122,0,0.12);
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.3);
+    --shadow-phone: 0 24px 80px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4);
+  }
+  body.dark .stage { background: linear-gradient(160deg,#1A1D26 0%,#13151C 100%); }
+
+  .dark-toggle {
+    position: fixed; top: 16px; right: 16px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-card); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; z-index: 100;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .dark-toggle:hover { box-shadow: var(--shadow-phone); }
+
+  /* ── CAMERA ELEMENTS ── */
+  .cam-video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .cam-still {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: none;
+  }
+  .cam-still.show { display: block; }
+  .cam-noperm {
+    position: absolute; inset: 0; display: none;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; text-align: center; padding: 20px;
+    color: rgba(255,255,255,0.6); font-size: 11px; font-weight: 500; line-height: 1.5;
+  }
+  .cam-noperm.show { display: flex; }
+  .upload-label {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 6px 0;
+    transition: color 0.15s;
+  }
+  .upload-label:hover { color: var(--bunq); }
+
+  /* ── LANGUAGE DETECTION BADGE ── */
+  .lang-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: var(--r-pill);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--rainbow); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+    border: 1px solid rgba(0,166,255,0.2); margin-bottom: 10px;
+  }
+
   body {
     font-family: 'Figtree', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg);
-    /* subtle dot grid — bunq uses geometric patterns */
     background-image: radial-gradient(circle, var(--bg-dot) 1px, transparent 1px);
     background-size: 22px 22px;
     color: var(--text);
@@ -125,6 +193,7 @@
     border: 0.5px solid rgba(0,0,0,0.10);
     overflow: hidden;
     box-shadow: var(--shadow-phone);
+    position: relative;
   }
 
   .status-bar {
@@ -175,14 +244,14 @@
   .scene-wrap {
     position: relative;
     overflow: hidden;
-    min-height: 468px;
+    height: 520px;
   }
   .scene {
     padding: 20px;
-    min-height: 468px;
+    height: 520px;
+    overflow-y: auto;
     position: absolute;
     inset: 0;
-    /* default hidden state */
     opacity: 0;
     transform: translateX(28px);
     pointer-events: none;
@@ -193,7 +262,7 @@
     opacity: 1;
     transform: translateX(0);
     pointer-events: auto;
-    position: relative;
+    position: absolute;
   }
   .scene.exit-left {
     opacity: 0;
@@ -1088,10 +1157,176 @@
   /* ─── BALANCE CARD (scene 0) ─── */
   #balance-card { background: linear-gradient(135deg, #EAF6FF 0%, #F0F9FF 100%); border-color: rgba(0,166,255,0.18); }
 
+  /* ═══════════════════════════════════════════════════════
+     BUNQ HOME OVERLAY
+     Sits over the phone shell, dismissed to reveal travel buddy
+  ═══════════════════════════════════════════════════════ */
+  .bunq-home {
+    position: absolute;
+    inset: 0;
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .bunq-home.hidden {
+    opacity: 0;
+    transform: scale(0.96);
+    pointer-events: none;
+  }
+
+  /* bunq home top bar */
+  .bh-topbar {
+    padding: 12px 18px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .bh-greeting { font-size: 13px; font-weight: 600; color: var(--text); }
+  .bh-greeting span { color: var(--text-muted); font-weight: 400; }
+  .bh-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--rainbow);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+
+  /* balance hero */
+  .bh-balance-wrap {
+    padding: 6px 18px 18px;
+    flex-shrink: 0;
+  }
+  .bh-balance-label { font-size: 10px; font-weight: 600; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
+  .bh-balance-amt   { font-size: 32px; font-weight: 700; color: var(--text); letter-spacing: -1px; line-height: 1; }
+  .bh-balance-sub   { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+  .bh-balance-change {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    font-size: 10px; font-weight: 700;
+    background: var(--success-bg); color: var(--success-dark);
+    margin-top: 6px;
+  }
+
+  /* quick actions row */
+  .bh-actions {
+    display: flex; gap: 8px;
+    padding: 0 18px 16px;
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .bh-actions::-webkit-scrollbar { display: none; }
+  .bh-action {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex-shrink: 0; cursor: pointer;
+  }
+  .bh-action-icon {
+    width: 44px; height: 44px; border-radius: var(--r-md);
+    background: var(--surface-2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .bh-action:hover .bh-action-icon { background: var(--surface-3); box-shadow: var(--shadow-card); }
+  .bh-action-label { font-size: 9px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+
+  /* travel buddy feature card */
+  .bh-feature {
+    margin: 0 14px 14px;
+    border-radius: var(--r-lg);
+    background: var(--rainbow);
+    padding: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 20px rgba(0,166,255,0.25);
+  }
+  .bh-feature:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,166,255,0.35); }
+  .bh-feature-inner {
+    background: var(--surface);
+    border-radius: calc(var(--r-lg) - 2px);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .bh-feature-icon {
+    width: 44px; height: 44px; border-radius: var(--r-md);
+    background: var(--rainbow);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .bh-feature-body { flex: 1; min-width: 0; }
+  .bh-feature-badge {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--bunq); margin-bottom: 3px;
+  }
+  .bh-feature-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+  .bh-feature-sub   { font-size: 11px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+  .bh-feature-arrow { color: var(--bunq); flex-shrink: 0; }
+
+  /* divider label */
+  .bh-section-label {
+    padding: 0 18px 8px;
+    font-size: 10px; font-weight: 700; color: var(--text-hint);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    flex-shrink: 0;
+  }
+
+  /* recent transactions */
+  .bh-txns {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 14px 16px;
+    display: flex; flex-direction: column; gap: 4px;
+    scrollbar-width: none;
+  }
+  .bh-txns::-webkit-scrollbar { display: none; }
+  .bh-txn {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: var(--r-md);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: background 0.12s;
+    cursor: default;
+  }
+  .bh-txn:hover { background: var(--surface-2); }
+  .bh-txn-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--surface-2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .bh-txn-info { flex: 1; min-width: 0; }
+  .bh-txn-name { font-size: 12px; font-weight: 600; color: var(--text); }
+  .bh-txn-meta { font-size: 10px; color: var(--text-hint); margin-top: 1px; font-weight: 400; }
+  .bh-txn-amt  { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bh-txn-amt.pos { color: var(--success-dark); }
+  .bh-txn-amt.neg { color: var(--text); }
+
+  /* bunq nav bar */
+  .bh-nav {
+    display: flex; border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--surface);
+  }
+  .bh-nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    padding: 10px 4px 12px;
+    font-size: 9px; font-weight: 600; color: var(--text-hint);
+    cursor: pointer; transition: color 0.15s;
+  }
+  .bh-nav-item.active { color: var(--bunq); }
+  .bh-nav-item svg { width: 20px; height: 20px; }
+
 </style>
 </head>
 <body>
-
+<button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌙</button>
 <div class="live-banner mock" id="live-banner">
   <span class="live-dot"></span>
   <span id="live-text">Checking bunq proxy...</span>
@@ -1099,6 +1334,172 @@
 
 <div class="stage">
   <div class="phone">
+
+    <!-- ══ BUNQ HOME OVERLAY ══════════════════════════════════
+         Simulates the bunq app home screen.
+         Dismissed by tapping "Open travel buddy"
+    ════════════════════════════════════════════════════════ -->
+    <div class="bunq-home" id="bunq-home">
+
+      <!-- status bar inside overlay -->
+      <div class="status-bar" style="flex-shrink:0"><span>9:41</span><span>●●●</span></div>
+      <div class="rainbow-stripe" style="flex-shrink:0"></div>
+
+      <!-- top bar -->
+      <div class="bh-topbar">
+        <div>
+          <div class="bh-greeting">Good evening, <span>Alex 👋</span></div>
+        </div>
+        <div class="bh-avatar">A</div>
+      </div>
+
+      <!-- balance hero -->
+      <div class="bh-balance-wrap">
+        <div class="bh-balance-label">Total balance</div>
+        <div class="bh-balance-amt">€3,842.50</div>
+        <div class="bh-balance-sub">bunq personal · IBAN NL12 BUNQ 0123 4567 89</div>
+        <div class="bh-balance-change">
+          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 8 L5 2 M2 5 L5 2 L8 5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          +€124.30 this month
+        </div>
+      </div>
+
+      <!-- quick actions -->
+      <div class="bh-actions">
+        <div class="bh-action">
+          <div class="bh-action-icon">↑</div>
+          <div class="bh-action-label">Send</div>
+        </div>
+        <div class="bh-action">
+          <div class="bh-action-icon">↓</div>
+          <div class="bh-action-label">Request</div>
+        </div>
+        <div class="bh-action">
+          <div class="bh-action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </div>
+          <div class="bh-action-label">Cards</div>
+        </div>
+        <div class="bh-action">
+          <div class="bh-action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8 L12 12 L15 14"/></svg>
+          </div>
+          <div class="bh-action-label">Insights</div>
+        </div>
+        <div class="bh-action">
+          <div class="bh-action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2 L12 4 M12 20 L12 22 M4.22 4.22 L5.64 5.64 M18.36 18.36 L19.78 19.78 M2 12 L4 12 M20 12 L22 12 M4.22 19.78 L5.64 18.36 M18.36 5.64 L19.78 4.22"/></svg>
+          </div>
+          <div class="bh-action-label">More</div>
+        </div>
+      </div>
+
+      <!-- travel buddy feature card -->
+      <div class="bh-feature" onclick="openTravelBuddy()">
+        <div class="bh-feature-inner">
+          <div class="bh-feature-icon">
+            <svg width="22" height="22" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="tb-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%"   stop-color="#ffffff"/>
+                  <stop offset="100%" stop-color="rgba(255,255,255,0.7)"/>
+                </linearGradient>
+              </defs>
+              <path d="M28 4 L3 13 L12 17 Z" fill="url(#tb-icon-grad)"/>
+              <path d="M28 4 L12 17 L13 27 L18 20 Z" fill="url(#tb-icon-grad)" opacity="0.55"/>
+              <path d="M28 4 L12 17 L18 20 Z" fill="url(#tb-icon-grad)" opacity="0.82"/>
+            </svg>
+          </div>
+          <div class="bh-feature-body">
+            <div class="bh-feature-badge">✦ NEW · AI FEATURE</div>
+            <div class="bh-feature-title">travel buddy</div>
+            <div class="bh-feature-sub">Scan menus, split bills, pay friends — all in one shot.</div>
+          </div>
+          <div class="bh-feature-arrow">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3 L11 8 L6 13"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- recent transactions -->
+      <div class="bh-section-label">Recent</div>
+      <div class="bh-txns">
+        <div class="bh-txn">
+          <div class="bh-txn-icon">✈️</div>
+          <div class="bh-txn-info">
+            <div class="bh-txn-name">Tokyo Narita · AMS</div>
+            <div class="bh-txn-meta">Yesterday · KLM</div>
+          </div>
+          <div class="bh-txn-amt neg">−€412.00</div>
+        </div>
+        <div class="bh-txn">
+          <div class="bh-txn-icon">🏨</div>
+          <div class="bh-txn-info">
+            <div class="bh-txn-name">Trunk Hotel Tokyo</div>
+            <div class="bh-txn-meta">Today · Shibuya</div>
+          </div>
+          <div class="bh-txn-amt neg">−€89.00</div>
+        </div>
+        <div class="bh-txn">
+          <div class="bh-txn-icon">🚇</div>
+          <div class="bh-txn-info">
+            <div class="bh-txn-name">Suica · IC Card</div>
+            <div class="bh-txn-meta">Today · JR East</div>
+          </div>
+          <div class="bh-txn-amt neg">−€18.50</div>
+        </div>
+        <div class="bh-txn">
+          <div class="bh-txn-icon">☕</div>
+          <div class="bh-txn-info">
+            <div class="bh-txn-name">Blue Bottle Coffee</div>
+            <div class="bh-txn-meta">Today · Shinjuku</div>
+          </div>
+          <div class="bh-txn-amt neg">−€6.20</div>
+        </div>
+        <div class="bh-txn">
+          <div class="bh-txn-icon">💶</div>
+          <div class="bh-txn-info">
+            <div class="bh-txn-name">Salary · Acme Corp</div>
+            <div class="bh-txn-meta">1 Apr · Direct deposit</div>
+          </div>
+          <div class="bh-txn-amt pos">+€3,200.00</div>
+        </div>
+        <div class="bh-txn">
+          <div class="bh-txn-icon">🌿</div>
+          <div class="bh-txn-info">
+            <div class="bh-txn-name">veritree · 2 trees planted</div>
+            <div class="bh-txn-meta">Today · bunq giving</div>
+          </div>
+          <div class="bh-txn-amt neg">−€0.60</div>
+        </div>
+      </div>
+
+      <!-- bottom nav -->
+      <div class="bh-nav">
+        <div class="bh-nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12 L12 4 L21 12 V20 A1 1 0 0 1 20 21 H15 V16 H9 V21 H4 A1 1 0 0 1 3 21 Z"/></svg>
+          Home
+        </div>
+        <div class="bh-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Cards
+        </div>
+        <div class="bh-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 12 L16 12 M12 8 L16 12 L12 16"/></svg>
+          Pay
+        </div>
+        <div class="bh-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          Insights
+        </div>
+        <div class="bh-nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20 C4 16 8 13 12 13 C16 13 20 16 20 20"/></svg>
+          Profile
+        </div>
+      </div>
+
+    </div><!-- /bunq-home -->
+
     <div class="status-bar"><span>9:41</span><span>●●●</span></div>
     <div class="rainbow-stripe"></div>
 
@@ -1150,7 +1551,7 @@
           <div class="buddies">
             <div class="buddy">
               <div class="avatar av-coral">J</div>
-              <div class="buddy-name">Julia</div>
+              <div class="buddy-name">Sara</div>
               <div class="buddy-meta">12 splits · <span class="bunq-wordmark">bunq</span></div>
             </div>
             <div class="buddy">
@@ -1160,7 +1561,7 @@
             </div>
             <div class="buddy">
               <div class="avatar">A</div>
-              <div class="buddy-name">Ana</div>
+              <div class="buddy-name">Alex</div>
               <div class="buddy-meta">5 splits · <span class="bunq-wordmark">bunq</span></div>
             </div>
           </div>
@@ -1172,7 +1573,7 @@
           <div class="history-row">
             <div>
               <div class="history-place">Lisbon · weekend</div>
-              <div class="history-meta">with Julia, Ana</div>
+              <div class="history-meta">with Sara, Alex</div>
             </div>
             <div class="history-amount">€142.30</div>
           </div>
@@ -1263,16 +1664,19 @@
         <p class="sub">Hold your camera steady. I'll scan, translate, and convert everything in one shot.</p>
 
         <div class="cam-frame">
+          <video class="cam-video" id="menu-video" autoplay playsinline muted></video>
+          <img  class="cam-still" id="menu-still" alt="">
+          <div class="cam-noperm" id="menu-noperm">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="6" width="20" height="15" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M9 6 L10.5 3 H13.5 L15 6"/></svg>
+            Camera unavailable — allow access or tap shutter for demo mode.
+          </div>
           <div class="cam-overlay">
-            <!-- corner guides -->
             <div class="cam-corner tl"></div>
             <div class="cam-corner tr"></div>
             <div class="cam-corner bl"></div>
             <div class="cam-corner br"></div>
-            <!-- scan line -->
             <div class="cam-scanline" id="menu-scanline"></div>
-            <!-- subject hint -->
-            <div class="cam-hint">お品書き</div>
+            <div class="cam-hint" id="menu-hint">お品書き</div>
           </div>
           <div class="cam-flash" id="menu-flash"></div>
         </div>
@@ -1358,13 +1762,19 @@
         <p class="sub">Snap the receipt, then record a voice note about who had what. I'll handle the rest.</p>
 
         <div class="cam-frame">
+          <video class="cam-video" id="bill-video" autoplay playsinline muted></video>
+          <img  class="cam-still" id="bill-still" alt="">
+          <div class="cam-noperm" id="bill-noperm">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="6" width="20" height="15" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M9 6 L10.5 3 H13.5 L15 6"/></svg>
+            Camera unavailable — use the upload button below or tap shutter for demo mode.
+          </div>
           <div class="cam-overlay">
             <div class="cam-corner tl"></div>
             <div class="cam-corner tr"></div>
             <div class="cam-corner bl"></div>
             <div class="cam-corner br"></div>
             <div class="cam-scanline" id="bill-scanline"></div>
-            <div class="cam-hint">居酒屋さくら</div>
+            <div class="cam-hint" id="bill-hint">居酒屋さくら</div>
           </div>
           <div class="cam-flash" id="bill-flash"></div>
         </div>
@@ -1380,7 +1790,7 @@
                   <line x1="12" y1="19" x2="12" y2="22"/>
                 </svg>
               </div>
-              <span class="record-label" id="record-label">Hold to record</span>
+              <span class="record-label" id="record-label">Tap to record</span>
             </button>
             <div class="voice-waveform" id="voice-waveform">
               <div class="waveform-bars" id="waveform-bars"></div>
@@ -1402,15 +1812,25 @@
             Voice ready
           </div>
         </div>
-        <p class="cam-tip">Snap the bill, then record who had what</p>
+        <p class="cam-tip">Snap the bill first, then record who had what</p>
+        <label class="upload-label" style="margin-top:8px">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1 L8 10 M4 4 L8 1 L12 4"/><rect x="2" y="11" width="12" height="4" rx="1.5"/></svg>
+          <span id="bill-upload-label">or upload a photo</span>
+          <input type="file" accept="image/*" capture="environment" style="display:none" onchange="uploadPhoto(this,'bill')">
+        </label>
       </div>
 
       <!-- SCENE 5: CAPTURE (was scene 3) -->
       <div class="scene" data-scene="5">
-        <h2>Captured at Izakaya Sakura</h2>
+        <h2 id="scene5-title">Captured</h2>
         <p class="sub">Photo and voice note ready. Tap to send to travel buddy.</p>
+        <!-- language detection badge — shown after AI analysis -->
+        <div id="lang-badge-5" style="display:none" class="lang-badge"></div>
         <div class="receipt">
-          <svg viewBox="0 0 240 300" width="200" height="250" style="transform: rotate(-1.2deg); filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));">
+          <!-- real photo when camera/upload used -->
+          <img id="captured-photo" style="display:none;max-width:200px;max-height:240px;border-radius:8px;transform:rotate(-1.2deg);filter:drop-shadow(0 4px 12px rgba(0,0,0,0.12));object-fit:cover;" alt="captured receipt">
+          <!-- fallback SVG receipt -->
+          <svg id="receipt-svg" viewBox="0 0 240 300" width="200" height="250" style="transform: rotate(-1.2deg); filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));">
             <rect x="12" y="10" width="216" height="280" fill="#FEFDFA" stroke="#D4D3CC" stroke-width="0.8"/>
             <text x="120" y="36" font-size="13" font-weight="600" text-anchor="middle" fill="#2A2A28" font-family="serif">居酒屋さくら</text>
             <text x="120" y="51" font-size="9" text-anchor="middle" fill="#888">Izakaya Sakura · Shibuya</text>
@@ -1431,24 +1851,33 @@
             <text x="120" y="275" font-size="8" text-anchor="middle" fill="#999">ありがとうございました</text>
           </svg>
         </div>
+        <!-- upload fallback -->
+        <label class="upload-label" style="margin-bottom:8px">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 1 L8 10 M4 4 L8 1 L12 4"/><rect x="2" y="11" width="12" height="4" rx="1.5"/></svg>
+          <span id="scene5-upload-label">Upload a different photo</span>
+          <input type="file" accept="image/*" capture="environment" style="display:none" onchange="uploadPhoto(this,'scene5')">
+        </label>
         <div class="voice voice-editable">
           <div class="voice-label">Voice note · transcribed · tap to edit</div>
-          <div class="voice-text" contenteditable="true" id="voice-transcript">"Julia had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."</div>
+          <div class="voice-text" contenteditable="true" id="voice-transcript">"Sara had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."</div>
         </div>
       </div>
+      <!-- hidden canvas for frame capture -->
+      <canvas id="cam-canvas" style="display:none"></canvas>
 
       <!-- SCENE 6: AGENTS (was 4) -->
       <div class="scene" data-scene="6">
         <h2>travel buddy is working</h2>
-        <p class="sub">Orchestrator fanning out to six specialist agents.</p>
+        <!-- dynamic sub — updated with detected language/currency -->
+        <p class="sub" id="agents-sub">Orchestrator fanning out to six specialist agents.</p>
         <div class="orch">
           <div class="orch-label">Orchestrator</div>
           <div class="orch-name">Claude on AWS Bedrock</div>
         </div>
         <div class="agents">
-          <div class="agent" data-agent="0"><div class="agent-name">Vision</div><div class="agent-sub">OCR, layout</div></div>
-          <div class="agent" data-agent="1"><div class="agent-name">Translate</div><div class="agent-sub">JP → EN</div></div>
-          <div class="agent" data-agent="2"><div class="agent-name">FX</div><div class="agent-sub">JPY → EUR</div></div>
+          <div class="agent" data-agent="0"><div class="agent-name">Vision</div><div class="agent-sub" id="agent-sub-0">OCR, layout</div></div>
+          <div class="agent" data-agent="1"><div class="agent-name">Translate</div><div class="agent-sub" id="agent-sub-1">detecting…</div></div>
+          <div class="agent" data-agent="2"><div class="agent-name">FX</div><div class="agent-sub" id="agent-sub-2">detecting…</div></div>
           <div class="agent" data-agent="3"><div class="agent-name">Group</div><div class="agent-sub">Tricount</div></div>
           <div class="agent" data-agent="4"><div class="agent-name">Split</div><div class="agent-sub">Diner math</div></div>
           <div class="agent" data-agent="5"><div class="agent-name">Payment</div><div class="agent-sub">bunq + link</div></div>
@@ -1460,117 +1889,118 @@
       <div class="scene" data-scene="7">
         <h2>Split ready</h2>
 
-        <!-- total bar — big number, instant context -->
+        <!-- total bar — updated by renderSplit() when AI analysis completes -->
         <div class="split-total-bar" style="margin-bottom:4px">
           <div>
             <div class="split-total-label">Total</div>
-            <div class="split-total-amt">€88.13</div>
+            <div class="split-total-amt" id="ai-total-amt">€88.13</div>
           </div>
           <div style="text-align:right">
-            <div class="split-total-sub">¥14,100</div>
-            <div class="split-total-sub">1 EUR = 160.01 JPY</div>
+            <div class="split-total-sub" id="ai-total-sub">¥14,100 · 1 EUR = 160.01 JPY</div>
           </div>
         </div>
-        <p class="sub" style="margin-bottom:14px">Tap a person to review the message before sending.</p>
+        <!-- AI confidence + language badge -->
+        <div id="ai-confidence" style="display:none;font-size:10px;font-weight:600;padding:4px 12px;border-radius:var(--r-pill);margin-bottom:10px;border:1px solid rgba(29,184,122,0.2);background:var(--success-bg);color:var(--success-dark)"></div>
+        <p class="sub" style="margin-bottom:10px">Tap a person to review the message before sending.</p>
 
-        <!-- JULIA -->
-        <div class="split-row" id="row-julia">
-          <div class="split-row-head" onclick="toggleDraw('draw-julia')">
-            <div class="avatar av-coral">J</div>
-            <div class="split-row-info">
-              <div class="split-row-name">Julia</div>
-              <div class="split-row-sub">Ate · skipped drinks · bunq user</div>
+        <div id="ai-people">
+
+          <!-- SARA -->
+          <div class="split-row" id="row-sara">
+            <div class="split-row-head" onclick="toggleDraw('draw-sara')">
+              <div class="avatar av-coral">S</div>
+              <div class="split-row-info">
+                <div class="split-row-name">Sara</div>
+                <div class="split-row-sub">Ate · skipped drinks · bunq user</div>
+              </div>
+              <div class="split-row-right">
+                <div class="split-row-eur">€23.13</div>
+                <div class="split-row-jpy">¥3,700</div>
+              </div>
+              <button class="split-row-action act-bunq" id="btn-sara"
+                onclick="event.stopPropagation(); paySara()">
+                Request
+              </button>
+              <svg class="split-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
             </div>
-            <div class="split-row-right">
-              <div class="split-row-eur">€23.13</div>
-              <div class="split-row-jpy">¥3,700</div>
-            </div>
-            <button class="split-row-action act-bunq" id="btn-julia"
-              onclick="event.stopPropagation(); payJulia()">
-              Request
-            </button>
-            <svg class="split-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
-          </div>
-          <div class="split-drawer" id="draw-julia">
-            <div class="split-drawer-inner">
-              <div>
-                <div class="drawer-msg-label">Message Julia will see</div>
-                <div class="drawer-msg-text" contenteditable="true">"Hi Julia, €23.13 for the izakaya tonight. You had sashimi + yakitori, no drinks 🍶"</div>
+            <div class="split-drawer" id="draw-sara">
+              <div class="split-drawer-inner">
+                <div class="drawer-msg-label">Message Sara will see</div>
+                <div class="drawer-msg-text" contenteditable="true">"Hi Sara, €23.13 for the izakaya tonight. You had sashimi + yakitori, no drinks 🍶"</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- MARCO -->
-        <div class="split-row" id="row-marco">
-          <div class="split-row-head" onclick="toggleDraw('draw-marco')">
-            <div class="avatar av-teal">M</div>
-            <div class="split-row-info">
-              <div class="split-row-name">Marco</div>
-              <div class="split-row-sub">Drinks only · not on bunq yet</div>
+          <!-- MARCO -->
+          <div class="split-row" id="row-marco">
+            <div class="split-row-head" onclick="toggleDraw('draw-marco')">
+              <div class="avatar av-teal">M</div>
+              <div class="split-row-info">
+                <div class="split-row-name">Marco</div>
+                <div class="split-row-sub">Drinks only · not on bunq yet</div>
+              </div>
+              <div class="split-row-right">
+                <div class="split-row-eur">€36.25</div>
+                <div class="split-row-jpy">¥5,800</div>
+              </div>
+              <button class="split-row-action act-link"
+                onclick="event.stopPropagation(); toggleDraw('draw-marco')">
+                Send link
+              </button>
+              <svg class="split-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
             </div>
-            <div class="split-row-right">
-              <div class="split-row-eur">€36.25</div>
-              <div class="split-row-jpy">¥5,800</div>
-            </div>
-            <button class="split-row-action act-link"
-              onclick="event.stopPropagation(); toggleDraw('draw-marco')">
-              Send link
-            </button>
-            <svg class="split-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
-          </div>
-          <div class="split-drawer" id="draw-marco">
-            <div class="split-drawer-inner">
-              <div>
+            <div class="split-drawer" id="draw-marco">
+              <div class="split-drawer-inner">
                 <div class="drawer-msg-label">Message Marco will see</div>
                 <div class="drawer-msg-text" contenteditable="true">"Hey Marco, €36.25 for the drinks last night — beers, sake, and your share of the cover. Cheers!"</div>
-              </div>
-              <div class="drawer-pay-opts">
-                <div class="drawer-pay-opt recommended" onclick="payMarco('bunq')">
-                  <div class="drawer-pay-opt-left">
-                    <div class="drawer-pay-opt-name"><span class="bunq-wordmark">bunq</span> link</div>
-                    <div class="drawer-pay-opt-meta">Instant · fee-free · invites Marco to bunq</div>
+                <div class="drawer-pay-opts">
+                  <div class="drawer-pay-opt recommended" onclick="payMarco('bunq')">
+                    <div class="drawer-pay-opt-left">
+                      <div class="drawer-pay-opt-name"><span class="bunq-wordmark">bunq</span> link</div>
+                      <div class="drawer-pay-opt-meta">Instant · fee-free · invites Marco to bunq</div>
+                    </div>
+                    <span class="drawer-rec-badge">Recommended</span>
                   </div>
-                  <span class="drawer-rec-badge">Recommended</span>
-                </div>
-                <div class="drawer-pay-opt" onclick="payMarco('other')">
-                  <div class="drawer-pay-opt-left">
-                    <div class="drawer-pay-opt-name">Other payment method</div>
-                    <div class="drawer-pay-opt-meta">Slower · fees may apply</div>
+                  <div class="drawer-pay-opt" onclick="payMarco('other')">
+                    <div class="drawer-pay-opt-left">
+                      <div class="drawer-pay-opt-name">Other payment method</div>
+                      <div class="drawer-pay-opt-meta">Slower · fees may apply</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- YOU -->
-        <div class="split-row no-action">
-          <div class="split-row-head">
-            <div class="avatar">U</div>
-            <div class="split-row-info">
-              <div class="split-row-name">You</div>
-              <div class="split-row-sub">Paid at the table</div>
+          <!-- ALEX (paid at table) -->
+          <div class="split-row no-action">
+            <div class="split-row-head">
+              <div class="avatar">A</div>
+              <div class="split-row-info">
+                <div class="split-row-name">Alex</div>
+                <div class="split-row-sub">Paid at the table</div>
+              </div>
+              <div class="split-row-right">
+                <div class="split-row-eur">€28.75</div>
+                <div class="split-row-jpy">¥4,600</div>
+              </div>
+              <div class="you-badge">Paid ✓</div>
             </div>
-            <div class="split-row-right">
-              <div class="split-row-eur">€28.75</div>
-              <div class="split-row-jpy">¥4,600</div>
-            </div>
-            <div class="you-badge">Paid ✓</div>
           </div>
-        </div>
+
+        </div><!-- /ai-people -->
 
         <div class="split-total-row">
           <span class="split-total-row-label">Total</span>
-          <span class="split-total-row-amt">¥14,100 · €88.13</span>
+          <span class="split-total-row-amt" id="ai-total-row">¥14,100 · €88.13</span>
         </div>
 
         <div class="chat-dock">
           <div class="chat-thread" id="chat-thread-split"></div>
           <div class="chat-suggestions">
-            <span class="chat-sug" onclick="askAssistant('Add Ana to the split')">Add Ana to the split</span>
-            <span class="chat-sug" onclick="askAssistant('What if Marco pays in USD?')">Marco pays in USD?</span>
-            <span class="chat-sug" onclick="askAssistant('Round everyone up to nearest euro')">Round to nearest €</span>
+            <span class="chat-sug" onclick="askAssistant('Explain the split')">Explain the split</span>
+            <span class="chat-sug" onclick="askAssistant('What if Marco pays in USD?')">Marco in USD?</span>
+            <span class="chat-sug" onclick="askAssistant('Round to nearest euro')">Round to nearest €</span>
           </div>
           <div class="chat-input-row">
             <input type="text" class="chat-input" placeholder="Ask travel buddy about this split..." onkeydown="if(event.key==='Enter') handleChatEnter(event, 'split')"/>
@@ -1590,7 +2020,7 @@
             </svg>
           </div>
           <div class="settled-title">All settled</div>
-          <p class="settled-sub" id="success-sub">Request sent to Julia · link sent to Marco</p>
+          <p class="settled-sub" id="success-sub">Request sent to Sara · link sent to Marco</p>
           <div class="req-id" id="req-id" style="display:none"></div>
         </div>
 
@@ -1701,6 +2131,673 @@
   const btnBack = document.getElementById('btn-back');
   const pill    = document.getElementById('pill');
 
+  // ── DARK MODE ──────────────────────────────────────────────
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let isDark = localStorage.getItem('tb-dark') !== null
+    ? localStorage.getItem('tb-dark') === '1'
+    : prefersDark;
+
+  function applyDark(d) {
+    document.body.classList.toggle('dark', d);
+    const tog = document.getElementById('dark-toggle');
+    if (tog) tog.textContent = d ? '☀️' : '🌙';
+  }
+  applyDark(isDark);
+
+  window.toggleDark = function() {
+    isDark = !isDark;
+    localStorage.setItem('tb-dark', isDark ? '1' : '0');
+    applyDark(isDark);
+  };
+
+  // ── BUNQ HOME OVERLAY ──────────────────────────────────────
+  window.openTravelBuddy = function() {
+    const overlay = document.getElementById('bunq-home');
+    if (!overlay) return;
+    overlay.classList.add('hidden');
+    // fully remove after transition so it doesn't intercept clicks
+    overlay.addEventListener('transitionend', () => {
+      overlay.style.display = 'none';
+    }, { once: true });
+  };
+
+  // ── SCENE LABELS ───────────────────────────────────────────
+  const labels = [
+    'Choose what to scan', 'Snap the menu', 'Later, snap the bill',
+    'Split after the meal', 'See the agents work', 'Let Finn handle it',
+    'See the split', 'Mark as settled', 'Restart demo'
+  ];
+  const pills = [
+    'Tokyo', 'What do you need?', 'Scan menu', 'Menu',
+    'Scan bill', 'Captured', 'Working', 'Split ready', 'Settled'
+  ];
+  const statusLines = [
+    'Reading the receipt…', 'Detecting language…',
+    'Translating items…', 'Converting currency…',
+    'Resolving Sara and Marco…', 'Preparing payment requests…'
+  ];
+  let current = 0;
+  let activePath = 'bill';
+
+  // ── SCENE TRANSITIONS ──────────────────────────────────────
+  function show(n, direction) {
+    scenes.forEach((s, i) => {
+      if (i === n) {
+        requestAnimationFrame(() => {
+          s.style.transform = direction < 0 ? 'translateX(-28px)' : 'translateX(28px)';
+          s.style.opacity = '0';
+          s.classList.add('active');
+          requestAnimationFrame(() => { s.style.transform = ''; s.style.opacity = ''; });
+        });
+      } else if (s.classList.contains('active')) {
+        s.style.transform = direction >= 0 ? 'translateX(-28px)' : 'translateX(28px)';
+        s.style.opacity = '0';
+        setTimeout(() => {
+          s.classList.remove('active');
+          s.style.transform = '';
+          s.style.opacity = '';
+        }, 320);
+      }
+    });
+
+    btn.textContent = labels[n] || labels[0];
+    pill.textContent = pills[n] || pills[0];
+    btnBack.style.display = (n > 1 && n < SCENE_COUNT - 1) ? 'inline-flex' : 'none';
+    btn.style.display = (n === 1 || n === 2 || n === 4) ? 'none' : 'flex';
+
+    if (n === 6) { runAgents(); analyzeImage(); }
+    handleCameraForScene(n);
+  }
+
+  window.pickMode = function(mode) {
+    activePath = mode;
+    if (mode === 'menu') { current = 2; show(2, 1); }
+    else { current = 4; show(4, 1); }
+  };
+
+  window.goBack = function() {
+    if (current === 6 && activePath === 'menu') { current = 3; show(3, -1); }
+    else if (current > 0) { current--; show(current, -1); }
+  };
+
+  btn.addEventListener('click', () => {
+    if (current === 3) { current = 6; show(6, 1); return; }
+    current = (current + 1) % SCENE_COUNT;
+    show(current, 1);
+  });
+
+  // ── AGENTS ANIMATION ───────────────────────────────────────
+  function runAgents() {
+    const agentEls = document.querySelectorAll('.agent');
+    const statusEl = document.getElementById('status-line');
+    agentEls.forEach(a => a.classList.remove('active', 'done'));
+    if (statusEl) statusEl.textContent = statusLines[0];
+    agentEls.forEach((a, i) => {
+      setTimeout(() => { a.classList.add('active'); if (statusEl) statusEl.textContent = statusLines[i] || ''; }, i * 520);
+      setTimeout(() => { a.classList.remove('active'); a.classList.add('done'); }, i * 520 + 440);
+    });
+    setTimeout(() => { if (statusEl) statusEl.textContent = 'All done — tap to see the split.'; }, agentEls.length * 520 + 200);
+  }
+
+  // ── CAMERA ─────────────────────────────────────────────────
+  let camStream   = null;
+  let capturedB64 = null; // stored for /analyze-image
+
+  async function startCamera(videoEl, nopermEl) {
+    if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      if (nopermEl) {
+        nopermEl.innerHTML = '📷 Camera needs HTTPS.<br>Open <strong>https://&lt;laptop-ip&gt;:3001</strong> on your phone.';
+        nopermEl.classList.add('show');
+      }
+      return;
+    }
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 960 } },
+        audio: false,
+      });
+      videoEl.srcObject = camStream;
+      if (nopermEl) nopermEl.classList.remove('show');
+    } catch (err) {
+      console.warn('[camera]', err.name, err.message);
+      if (nopermEl) {
+        const msg = err.name === 'NotAllowedError' ? 'Camera permission denied — check browser settings and reload.'
+          : err.name === 'NotFoundError' ? 'No camera found on this device.'
+          : `Camera unavailable (${err.name}) — use the upload button.`;
+        nopermEl.innerHTML = `📷 ${msg}`;
+        nopermEl.classList.add('show');
+      }
+    }
+  }
+
+  function stopCamera() {
+    if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  }
+
+  function captureFrame(videoEl) {
+    const canvas = document.getElementById('cam-canvas');
+    canvas.width  = videoEl.videoWidth  || 640;
+    canvas.height = videoEl.videoHeight || 480;
+    canvas.getContext('2d').drawImage(videoEl, 0, 0);
+    return canvas.toDataURL('image/jpeg', 0.88);
+  }
+
+  function handleCameraForScene(n) {
+    if (n === 2) startCamera(document.getElementById('menu-video'), document.getElementById('menu-noperm'));
+    else if (n === 4) { startCamera(document.getElementById('bill-video'), document.getElementById('bill-noperm')); startAudioStream(); }
+    else stopCamera();
+  }
+
+  window.shootMenu = function() {
+    const shutter = document.getElementById('menu-shutter');
+    if (!shutter || shutter.disabled) return;
+    shutter.disabled = true;
+    const video = document.getElementById('menu-video');
+    const still = document.getElementById('menu-still');
+    const hint  = document.getElementById('menu-hint');
+    if (camStream && video?.readyState >= 2) {
+      const url = captureFrame(video);
+      if (still) { still.src = url; still.classList.add('show'); }
+      if (hint)  hint.style.opacity = '0';
+    }
+    document.getElementById('menu-flash')?.classList.add('flash-go');
+    document.getElementById('menu-scanline')?.classList.add('scan-go');
+    setTimeout(() => {
+      document.getElementById('menu-flash')?.classList.remove('flash-go');
+      document.getElementById('menu-scanline')?.classList.remove('scan-go');
+      stopCamera(); current = 3; show(3, 1); shutter.disabled = false;
+    }, 900);
+  };
+
+  window.shootBill = function() {
+    const shutter = document.getElementById('bill-shutter');
+    if (!shutter || shutter.disabled) return;
+    shutter.disabled = true;
+    const video = document.getElementById('bill-video');
+    const still = document.getElementById('bill-still');
+    const hint  = document.getElementById('bill-hint');
+    if (camStream && video?.readyState >= 2) {
+      const url = captureFrame(video);
+      capturedB64 = url.split(',')[1];
+      if (still) { still.src = url; still.classList.add('show'); }
+      if (hint)  hint.style.opacity = '0';
+      _showCapturedPhoto(url);
+    }
+    document.getElementById('bill-flash')?.classList.add('flash-go');
+    document.getElementById('bill-scanline')?.classList.add('scan-go');
+    setTimeout(() => {
+      document.getElementById('bill-flash')?.classList.remove('flash-go');
+      document.getElementById('bill-scanline')?.classList.remove('scan-go');
+      stopCamera(); current = 5; show(5, 1); shutter.disabled = false;
+    }, 900);
+  };
+
+  function _showCapturedPhoto(dataUrl) {
+    const img = document.getElementById('captured-photo');
+    const svg = document.getElementById('receipt-svg');
+    if (img) { img.src = dataUrl; img.style.display = 'block'; }
+    if (svg) svg.style.display = 'none';
+  }
+
+  window.uploadPhoto = function(inputEl, slot) {
+    const file = inputEl.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target.result;
+      capturedB64   = dataUrl.split(',')[1];
+      _showCapturedPhoto(dataUrl);
+      const lbl = document.getElementById(slot === 'bill' ? 'bill-upload-label' : 'scene5-upload-label');
+      if (lbl) lbl.textContent = '✓ ' + file.name;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ── AUDIO ──────────────────────────────────────────────────
+  let mediaRecorder = null;
+  let audioChunks   = [];
+  let isRecording   = false;
+  let audioStream   = null;
+
+  async function startAudioStream() {
+    if (audioStream) return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      console.warn('[audio] getUserMedia unavailable — needs HTTPS');
+      return;
+    }
+    try {
+      audioStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      console.log('[audio] mic ready');
+    } catch (err) {
+      console.warn('[audio]', err.name, err.message);
+    }
+  }
+
+  function getSupportedMime() {
+    if (typeof MediaRecorder === 'undefined') return '';
+    const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+    return types.find(t => { try { return MediaRecorder.isTypeSupported(t); } catch(e) { return false; } }) || '';
+  }
+
+  function blobToBase64(blob) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload  = () => res(r.result.split(',')[1]);
+      r.onerror = rej;
+      r.readAsDataURL(blob);
+    });
+  }
+
+  async function toggleRecording({ btnId, labelId, barsId, previewId, transcriptId, fallback }) {
+    const btnEl  = document.getElementById(btnId);
+    const lblEl  = document.getElementById(labelId);
+    const barsEl = document.getElementById(barsId);
+    const preEl  = document.getElementById(previewId);
+
+    // STOP
+    if (isRecording && mediaRecorder?.state === 'recording') {
+      mediaRecorder.stop();
+      return;
+    }
+
+    await startAudioStream();
+
+    if (!audioStream) {
+      const why = !navigator.mediaDevices?.getUserMedia
+        ? 'Mic needs HTTPS — open the phone URL with https://'
+        : 'Mic permission denied — check browser settings';
+      if (lblEl) lblEl.textContent = why;
+      setTimeout(() => runTypewriter(fallback, preEl, barsEl, btnEl, lblEl, () => {
+        if (transcriptId) { const t = document.getElementById(transcriptId); if (t) t.textContent = fallback; }
+      }), 800);
+      return;
+    }
+
+    // START
+    isRecording = true;
+    audioChunks = [];
+    const mime = getSupportedMime();
+    try {
+      mediaRecorder = mime ? new MediaRecorder(audioStream, { mimeType: mime }) : new MediaRecorder(audioStream);
+    } catch(e) {
+      mediaRecorder = new MediaRecorder(audioStream);
+    }
+
+    mediaRecorder.ondataavailable = e => { if (e.data?.size > 0) audioChunks.push(e.data); };
+
+    mediaRecorder.onstop = async () => {
+      isRecording = false;
+      btnEl.classList.remove('recording');
+      lblEl.textContent = 'Transcribing…';
+      barsEl.innerHTML  = '';
+
+      const actualMime = mediaRecorder.mimeType || 'audio/webm';
+      const blob = new Blob(audioChunks, { type: actualMime });
+      console.log(`[audio] ${Math.round(blob.size/1024)}KB as ${actualMime}`);
+      try {
+        const base64 = await blobToBase64(blob);
+        const resp   = await fetch(PROXY_BASE + '/upload-audio', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audio: base64, mimeType: actualMime.split(';')[0] }),
+        });
+        const data = await resp.json();
+        const text = (data.transcript && data.transcript !== '[inaudible]') ? data.transcript : fallback;
+        preEl.textContent = text;
+        lblEl.textContent = 'Recorded ✓';
+        if (transcriptId) { const t = document.getElementById(transcriptId); if (t) t.textContent = text; }
+      } catch(err) {
+        console.warn('[audio] transcription failed:', err.message);
+        preEl.textContent = fallback;
+        lblEl.textContent = 'Recorded ✓ (demo)';
+        if (transcriptId) { const t = document.getElementById(transcriptId); if (t) t.textContent = fallback; }
+      }
+    };
+
+    btnEl.classList.add('recording');
+    lblEl.textContent = 'Recording… tap to stop';
+    barsEl.innerHTML = Array.from({length: 20}, () =>
+      `<div class="wbar" style="height:${4 + Math.random()*24}px;animation-delay:${Math.random()*0.4}s"></div>`
+    ).join('');
+    preEl.textContent = '';
+    mediaRecorder.start();
+  }
+
+  // Fallback typewriter when no mic
+  const TRANSCRIPT_BILL = '"Sara had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."';
+  const TRANSCRIPT_MENU = '"Sara will have the sashimi platter and yakitori. Marco wants the beers and sake. I\'ll have the fried chicken and dumplings."';
+
+  function runTypewriter(text, preEl, barsEl, btnEl, lblEl, onDone) {
+    btnEl.classList.add('recording');
+    lblEl.textContent = 'Recording…';
+    preEl.textContent = '';
+    barsEl.innerHTML = Array.from({length: 20}, () =>
+      `<div class="wbar" style="height:${4 + Math.random()*24}px;animation-delay:${Math.random()*0.4}s"></div>`
+    ).join('');
+    let i = 0;
+    const t = setInterval(() => {
+      preEl.textContent = text.slice(0, ++i);
+      if (i >= text.length) {
+        clearInterval(t);
+        setTimeout(() => {
+          btnEl.classList.remove('recording');
+          lblEl.textContent = 'Recorded ✓';
+          barsEl.innerHTML = '';
+          if (onDone) onDone();
+        }, 380);
+      }
+    }, 36);
+  }
+
+  window.startRecording = function() {
+    toggleRecording({ btnId:'record-btn', labelId:'record-label', barsId:'waveform-bars', previewId:'voice-preview', transcriptId:'voice-transcript', fallback: TRANSCRIPT_BILL });
+  };
+  window.startRecordingMenu = function() {
+    toggleRecording({ btnId:'record-btn-menu', labelId:'record-label-menu', barsId:'waveform-bars-menu', previewId:'voice-preview-menu', transcriptId:null, fallback: TRANSCRIPT_MENU });
+  };
+
+  // ── AI BILL ANALYSIS ───────────────────────────────────────
+  let aiSplit = null;
+
+  async function analyzeImage() {
+    const transcript = document.getElementById('voice-transcript')?.textContent || '';
+    if (!capturedB64) { console.log('[vision] no image — using demo values'); return; }
+
+    try {
+      const resp = await fetch(PROXY_BASE + '/analyze-image', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: capturedB64, transcript, mimeType: 'image/jpeg' }),
+      });
+      const data = await resp.json();
+      if (data.ok && data.split) { aiSplit = data.split; renderSplit(aiSplit); }
+    } catch(err) {
+      console.warn('[vision] analyze failed:', err.message);
+    }
+  }
+
+  function renderSplit(split) {
+    // Update agent subtitles with detected language/currency
+    const sub1 = document.getElementById('agent-sub-1');
+    const sub2 = document.getElementById('agent-sub-2');
+    if (sub1 && split.translate_label) sub1.textContent = split.translate_label;
+    if (sub2 && split.bill_currency_code) sub2.textContent = `${split.bill_currency_code} → EUR`;
+
+    // Update agents sub paragraph
+    const agSub = document.getElementById('agents-sub');
+    if (agSub && split.detected_language) {
+      agSub.textContent = `Detected ${split.detected_language} bill · ${split.bill_currency_code} → EUR. Fanning out to six agents.`;
+    }
+
+    // Update scene 5 title and lang badge
+    const t5 = document.getElementById('scene5-title');
+    if (t5 && split.restaurant) t5.textContent = `Captured · ${split.restaurant}`;
+    const lb = document.getElementById('lang-badge-5');
+    if (lb && split.detected_language) {
+      lb.textContent = `${split.detected_language} · ${split.bill_currency_code}`;
+      lb.style.display = 'inline-flex';
+    }
+
+    // Update total bar
+    const totAmt = document.getElementById('ai-total-amt');
+    const totSub = document.getElementById('ai-total-sub');
+    const totRow = document.getElementById('ai-total-row');
+    if (totAmt) totAmt.textContent = `€${split.total_bill_eur?.toFixed(2) ?? split.total_bill}`;
+    if (totSub) totSub.textContent = `${split.bill_currency}${split.total_bill?.toLocaleString()}${split.fx_rate ? ' · ' + split.fx_rate : ''}`;
+    if (totRow) totRow.textContent = `${split.bill_currency}${split.total_bill?.toLocaleString()} · €${split.total_bill_eur?.toFixed(2)}`;
+
+    // Confidence badge
+    const badge = document.getElementById('ai-confidence');
+    if (badge) {
+      const col = { high: 'var(--success-dark)', medium: 'var(--amber)', low: 'var(--coral)' }[split.confidence] || 'var(--text-hint)';
+      badge.style.color   = col;
+      badge.style.display = 'block';
+      badge.textContent   = `AI · ${split.detected_language} · ${split.confidence} confidence · ${split.restaurant}`;
+    }
+
+    // Render person rows
+    const container = document.getElementById('ai-people');
+    if (!container || !split.people?.length) return;
+    const avatarColors = ['av-coral','av-teal',''];
+    const isLastAlex  = true; // Alex always last
+
+    container.innerHTML = split.people.map((p, i) => {
+      const isAlex = i === split.people.length - 1;
+      const init   = p.name.charAt(0).toUpperCase();
+      const cls    = avatarColors[i] || '';
+      const amtLabel = `${split.bill_currency}${p.subtotal_original?.toLocaleString() || 0}`;
+      const eurLabel = `€${p.subtotal_eur?.toFixed(2) || '0.00'}`;
+
+      // Items assigned to this person
+      const theirItems = (split.items || [])
+        .filter(it => it.assigned_to === p.name || it.assigned_to === 'shared')
+        .map(it => {
+          const shared = it.assigned_to === 'shared' ? ' (shared)' : '';
+          return `${it.name_en || it.name_original} — ${split.bill_currency}${it.price_original?.toLocaleString()}${shared}`;
+        }).join('<br>') || 'No items assigned';
+
+      if (isAlex) return `
+        <div class="split-row no-action">
+          <div class="split-row-head">
+            <div class="avatar ${cls}">${init}</div>
+            <div class="split-row-info">
+              <div class="split-row-name">${p.name}</div>
+              <div class="split-row-sub">${p.note}</div>
+            </div>
+            <div class="split-row-right">
+              <div class="split-row-eur">${eurLabel}</div>
+              <div class="split-row-jpy">${amtLabel}</div>
+            </div>
+            <div class="you-badge">Paid ✓</div>
+          </div>
+        </div>`;
+
+      const isSara = i === 0;
+      const drawId = `draw-ai-${i}`;
+      const action = isSara
+        ? `<button class="split-row-action act-bunq" onclick="event.stopPropagation();paySara()">Request</button>`
+        : `<button class="split-row-action act-link" onclick="event.stopPropagation();toggleDraw('${drawId}')">Send link</button>`;
+
+      return `
+        <div class="split-row">
+          <div class="split-row-head" onclick="toggleDraw('${drawId}')">
+            <div class="avatar ${cls}">${init}</div>
+            <div class="split-row-info">
+              <div class="split-row-name">${p.name}</div>
+              <div class="split-row-sub">${p.note}</div>
+            </div>
+            <div class="split-row-right">
+              <div class="split-row-eur">${eurLabel}</div>
+              <div class="split-row-jpy">${amtLabel}</div>
+            </div>
+            ${action}
+            <svg class="split-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5 L7 9 L11 5"/></svg>
+          </div>
+          <div class="split-drawer" id="${drawId}">
+            <div class="split-drawer-inner">
+              <div class="drawer-msg-label">Items · tap message to edit</div>
+              <div class="drawer-msg-text" style="margin-bottom:8px;cursor:default;font-size:11px">${theirItems}</div>
+              <div class="drawer-msg-label">Message</div>
+              <div class="drawer-msg-text" contenteditable="true">"Hi ${p.name}, ${eurLabel} for dinner. ${p.note} 🧾"</div>
+              ${!isSara ? `<div class="drawer-pay-opts" style="margin-top:8px">
+                <div class="drawer-pay-opt recommended" onclick="payMarco('bunq')">
+                  <div class="drawer-pay-opt-left">
+                    <div class="drawer-pay-opt-name"><span class="bunq-wordmark">bunq</span> link</div>
+                    <div class="drawer-pay-opt-meta">Instant · fee-free</div>
+                  </div>
+                  <span class="drawer-rec-badge">Recommended</span>
+                </div>
+                <div class="drawer-pay-opt" onclick="payMarco('other')">
+                  <div class="drawer-pay-opt-left">
+                    <div class="drawer-pay-opt-name">Other method</div>
+                    <div class="drawer-pay-opt-meta">Slower · fees may apply</div>
+                  </div>
+                </div>
+              </div>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── PAYMENTS ───────────────────────────────────────────────
+  window.paySara = async function() {
+    const b   = document.getElementById('btn-sara');
+    const sub = document.getElementById('success-sub');
+    if (live) {
+      if (b) { b.disabled = true; b.textContent = 'Sending…'; }
+      try {
+        const amt  = aiSplit ? String(aiSplit.people[0]?.subtotal_eur?.toFixed(2)) : '23.13';
+        const resp = await fetch(PROXY_BASE + '/request-money', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: amt, currency: 'EUR', email: 'sara.demo@bunq.com', description: `Dinner — Sara share` }),
+        });
+        const data = await resp.json();
+        if (data.ok) {
+          if (sub) sub.innerHTML = `Real bunq request sent to Sara for €${data.amount}.<br>Marco's link is on its way.`;
+          const rid = document.getElementById('req-id');
+          if (rid) { rid.textContent = `request-inquiry #${data.requestId}`; rid.style.display = 'inline-block'; }
+        }
+      } catch(e) {
+        if (sub) sub.innerHTML = 'Sara sent €23.13 via bunq — instant.<br>Link sent to Marco.';
+      }
+      if (b) { b.disabled = false; }
+    } else {
+      if (sub) sub.innerHTML = 'Sara sent €23.13 via bunq — instant.<br>Link sent to Marco.';
+    }
+    current = 8; show(8, 1);
+  };
+
+  window.payMarco = function(method) {
+    const sub = document.getElementById('success-sub');
+    if (sub) sub.innerHTML = method === 'bunq'
+      ? 'Sara\'s request sent via <span class="bunq-wordmark">bunq</span>.<br><span class="bunq-wordmark">bunq</span> link sent to Marco.'
+      : 'Sara\'s request sent.<br>Payment link sent to Marco via external provider.';
+    current = 8; show(8, 1);
+  };
+
+  // ── TOGGLES ────────────────────────────────────────────────
+  window.toggleDraw = function(id) {
+    const d = document.getElementById(id);
+    if (!d) return;
+    const was = d.classList.contains('open');
+    document.querySelectorAll('.split-drawer.open').forEach(x => x.classList.remove('open'));
+    if (!was) d.classList.add('open');
+  };
+
+  window.toggleSettledChip = function(id) {
+    const d    = document.getElementById(id);
+    const chev = document.getElementById(id.replace('chip-','chev-'));
+    if (!d) return;
+    const was = d.classList.contains('open');
+    document.querySelectorAll('.settled-chip-detail.open').forEach(x => x.classList.remove('open'));
+    document.querySelectorAll('.settled-chip-chevron.open').forEach(x => x.classList.remove('open'));
+    if (!was) { d.classList.add('open'); if (chev) chev.classList.add('open'); }
+  };
+
+  window.toggleMemoryDetail = function() {
+    document.getElementById('memory-detail')?.classList.toggle('open');
+  };
+
+  // ── PROXY HEALTH CHECK ─────────────────────────────────────
+  async function checkProxy() {
+    const banner = document.getElementById('live-banner');
+    const text   = document.getElementById('live-text');
+    try {
+      const res  = await fetch(PROXY_BASE + '/health');
+      const data = await res.json();
+      if (data.ok) {
+        live = true;
+        banner.classList.replace('mock','live');
+        const chatBadge = data.chatLive ? ' · AI live' : ' · AI scripted';
+        text.innerHTML = `Live · <span class="bunq-wordmark">bunq</span> sandbox · ${data.balance?.currency} ${data.balance?.value}${chatBadge}`;
+        const bc = document.getElementById('balance-card');
+        if (bc) {
+          bc.style.display = 'block';
+          const bv = document.getElementById('balance-val');
+          const bs = document.getElementById('balance-sub');
+          if (bv) bv.textContent = `${data.balance.currency} ${data.balance.value}`;
+          if (bs) bs.textContent = data.accountDesc || `Account #${data.accountId}`;
+        }
+      } else throw new Error();
+    } catch {
+      live = false;
+      banner.classList.replace('live','mock');
+      text.innerHTML = 'Mock mode · <span class="bunq-wordmark">bunq</span> proxy not reachable';
+    }
+  }
+
+  // ── CHAT ───────────────────────────────────────────────────
+  const scriptedAnswers = {
+    'Explain the split': `Sara had the food (sashimi + yakitori, no drinks). Marco had the drinks (beers + sake). Alex paid the full bill and is collecting.`,
+    'What if Marco pays in USD?': `Marco's share converts to roughly $39 at today's rate. The bunq link handles currency automatically.`,
+    'Round to nearest euro': `Rounded: Sara €24, Marco €37, Alex €28. Difference goes into your Tokyo trip pot.`,
+    'Why do izakayas charge for otoshi?': `お通し (otoshi) is a small appetizer served automatically — it doubles as a cover charge. Refusing is possible but considered impolite.`,
+    'Export this trip as a PDF': `I'll compile the Tokyo trip expenses as a PDF and send it to your bunq inbox.`,
+    'Show me my Tokyo food spending': `Food so far: €267 across 5 meals. The izakaya tonight was your 2nd highest.`,
+    'Cancel the reminder for Marco': `Reminder cancelled. Marco won't get a nudge — I'll still notify you if the payment link is opened.`,
+  };
+
+  window.askAssistant = async function(question) {
+    const activeScene = document.querySelector('.scene.active');
+    if (!activeScene) return;
+    const threadId = activeScene.dataset.scene === '8' ? 'chat-thread-paid' : 'chat-thread-split';
+    const thread   = document.getElementById(threadId);
+    if (!thread) return;
+
+    const userBubble = document.createElement('div');
+    userBubble.className   = 'chat-msg chat-msg-user';
+    userBubble.textContent = question;
+    thread.appendChild(userBubble);
+
+    const typing = document.createElement('div');
+    typing.className   = 'chat-msg chat-msg-bot';
+    typing.textContent = '…';
+    thread.appendChild(typing);
+    thread.scrollTop = thread.scrollHeight;
+
+    let reply = scriptedAnswers[question];
+
+    if (!reply && live) {
+      try {
+        const resp = await fetch(PROXY_BASE + '/chat', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question }),
+        });
+        const data = await resp.json();
+        if (data.reply) reply = data.reply;
+      } catch(e) { /* fall through */ }
+    }
+
+    reply = reply || 'Let me check that — ask me again after we settle up.';
+
+    setTimeout(() => {
+      typing.textContent = reply;
+      thread.scrollTop   = thread.scrollHeight;
+    }, 400 + Math.random() * 300);
+  };
+
+  window.handleChatEnter = function(e, where) {
+    const input = e.target;
+    const q = input.value.trim();
+    if (!q) return;
+    input.value = '';
+    askAssistant(q);
+  };
+
+  checkProxy();
+  show(0, 1);
+})();
+</script>
+</body>
+</html>
+  let live = false;
+  const SCENE_COUNT = 9;
+
+  const scenes  = document.querySelectorAll('.scene');
+  const btn     = document.getElementById('btn');
+  const btnBack = document.getElementById('btn-back');
+  const pill    = document.getElementById('pill');
+
   const labels = [
     'Choose what to scan',   // 0
     'Snap the menu',         // 1 — hidden (mode cards drive it)
@@ -1717,7 +2814,7 @@
   ];
   const statusLines = [
     'Reading the receipt...', 'Translating from Japanese...',
-    'Converting ¥ to €...', 'Resolving Julia and Marco...',
+    'Converting ¥ to €...', 'Resolving Sara and Marco...',
     'Calculating per-diner amounts...', 'Preparing payment requests...'
   ];
   let current = 0;
@@ -1781,8 +2878,8 @@
   };
 
   // ── VOICE RECORDING ───────────────────────────────────────
-  const TRANSCRIPT_BILL = '"Julia had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."';
-  const TRANSCRIPT_MENU = '"Julia will have the sashimi platter and yakitori. Marco wants the beers and sake. I\'ll have the fried chicken and dumplings."';
+  const TRANSCRIPT_BILL = '"Sara had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."';
+  const TRANSCRIPT_MENU = '"Sara will have the sashimi platter and yakitori. Marco wants the beers and sake. I\'ll have the fried chicken and dumplings."';
   let recording = false;
   let recTimer  = null;
 
@@ -1920,8 +3017,8 @@
     show(current, 1);
   });
 
-  window.payJulia = async function() {
-    const b    = document.getElementById('btn-julia');
+  window.paySara = async function() {
+    const b    = document.getElementById('btn-sara');
     const sub  = document.getElementById('success-sub');
     const reqEl = document.getElementById('req-id');
     const tKv   = document.getElementById('tricount-kv');
@@ -1934,7 +3031,7 @@
         const res  = await fetch(PROXY_BASE + '/request-money', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: '23.13', currency: 'EUR', email: 'julia.demo@bunq.com', description: 'Izakaya Sakura — Julia share' })
+          body: JSON.stringify({ amount: '23.13', currency: 'EUR', email: 'sara.demo@bunq.com', description: 'Izakaya Sakura — Sara share' })
         });
         const data = await res.json();
         if (res.ok && data.ok) {
@@ -1946,7 +3043,7 @@
         } else throw new Error(data.error || 'request failed');
       } catch(e) {
         console.warn('Live request failed:', e.message);
-        sub.innerHTML = `Julia sent €23.13 via bunq — instant.<br>Payment link sent to Marco.`;
+        sub.innerHTML = `Sara sent €23.13 via bunq — instant.<br>Payment link sent to Marco.`;
       }
       b.disabled = false;
     }
@@ -1957,8 +3054,8 @@
     const sub = document.getElementById('success-sub');
     if (sub) {
       sub.innerHTML = method === 'bunq'
-        ? 'Julia sent €23.13 via <span class="bunq-wordmark">bunq</span> — instant.<br><span class="bunq-wordmark">bunq</span> link sent to Marco with a 2-minute sign-up.'
-        : 'Julia sent €23.13 via <span class="bunq-wordmark">bunq</span> — instant.<br>Payment link sent via an external provider (1–2 days, fees applied).';
+        ? 'Sara sent €23.13 via <span class="bunq-wordmark">bunq</span> — instant.<br><span class="bunq-wordmark">bunq</span> link sent to Marco with a 2-minute sign-up.'
+        : 'Sara sent €23.13 via <span class="bunq-wordmark">bunq</span> — instant.<br>Payment link sent via an external provider (1–2 days, fees applied).';
     }
     current = 8; show(8, 1);
   };
@@ -1995,9 +3092,9 @@
 
   const scriptedAnswers = {
     'Why do izakayas charge for otoshi?': 'お通し (otoshi) is a small appetizer automatically served when you sit down — it doubles as a cover charge, typically 300–900¥ per person. Refusing it is technically possible but considered rude.',
-    'Add Ana to the split': 'Ana wasn\'t at the izakaya tonight — I didn\'t include her. Want me to message her anyway and split €88.13 four ways (€22.03 each)?',
+    'Add Alex to the split': 'Alex wasn\'t at the izakaya tonight — I didn\'t include her. Want me to message her anyway and split €88.13 four ways (€22.03 each)?',
     'What if Marco pays in USD?': 'Marco\'s share is €36.25 ≈ $39.13 at today\'s rate. The bunq link auto-detects his currency. Other providers convert at their own (typically worse) rates.',
-    'Round everyone up to nearest euro': 'Rounded: Julia €24, Marco €37, you €29. The extra €1.62 goes into your Tokyo trip pot.',
+    'Round everyone up to nearest euro': 'Rounded: Sara €24, Marco €37, you €29. The extra €1.62 goes into your Tokyo trip pot.',
     'Export this trip as a PDF': 'I\'ll compile the Tokyo trip (7 expenses, €431 total) as a PDF. Ready in 10 seconds — sent to your bunq inbox.',
     'Show me my Tokyo food spending': 'Food so far this trip: €267.40 across 5 meals. Average €53.50/meal. The izakaya tonight was your 2nd highest.',
     'Cancel the reminder for Marco': 'Reminder canceled. Marco won\'t get a nudge. I\'ll still notify you if the payment link is opened.'
