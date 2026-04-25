@@ -475,6 +475,19 @@
   .menu-jp  { grid-column: 1; color: var(--text-hint); font-size: 9.5px; }
   .menu-en  { grid-column: 1; color: var(--text); font-weight: 600; font-size: 11.5px; line-height: 1.2; }
   .menu-price { grid-row: span 2; grid-column: 2; color: var(--bunq); font-weight: 700; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .fx-card {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--success-bg); border-radius: 12px;
+    padding: 10px 14px; margin: 10px 0 2px; gap: 8px;
+  }
+  .fx-card-left .fx-label { font-size: 10px; font-weight: 600; color: var(--success-dark); letter-spacing: 0.3px; }
+  .fx-card-left .fx-rate  { font-size: 17px; font-weight: 700; color: var(--text); margin-top: 1px; }
+  .fx-card-right { text-align: right; }
+  .fx-pill {
+    display: inline-block; background: var(--success); color: #fff;
+    font-size: 10px; font-weight: 600; border-radius: 20px; padding: 2px 8px; margin-bottom: 3px;
+  }
+  .fx-sentiment { font-size: 10.5px; color: var(--success-dark); font-weight: 500; }
 
   /* ─── CAMERA VIEWFINDER (scenes 2 & 4) ─── */
   .cam-frame {
@@ -663,7 +676,99 @@
   }
 
   /* ─── SCENE 2: CAPTURE ─── */
-  .receipt { display: flex; justify-content: center; padding: 4px 0 14px; }
+  .capture-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    align-items: start;
+    margin: 4px 0 12px;
+  }
+  .capture-pane {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 8px;
+  }
+  .capture-pane-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .receipt {
+    display: flex;
+    justify-content: center;
+    padding: 2px 0 4px;
+    min-height: 258px;
+    align-items: center;
+  }
+  .translated-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 6px 7px;
+  }
+  .translated-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--border-strong);
+  }
+  .translated-head-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .translated-head-meta {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--bunq);
+  }
+  .translated-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1px 6px;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .translated-row:last-child { margin-bottom: 0; }
+  .translated-jp {
+    font-size: 8px;
+    color: var(--text-hint);
+  }
+  .translated-en {
+    font-size: 10px;
+    color: var(--text);
+    font-weight: 600;
+    line-height: 1.1;
+  }
+  .translated-price {
+    grid-row: span 2;
+    font-size: 10px;
+    color: var(--bunq);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .translated-total {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px dashed var(--border-strong);
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 420px) {
+    .capture-compare { grid-template-columns: 1fr; }
+    .receipt { min-height: auto; }
+  }
   .voice {
     font-style: italic;
     color: var(--text-muted);
@@ -1153,9 +1258,38 @@
     letter-spacing: 0.01em;
   }
   .chat-send:hover { background: var(--bunq-dark); }
+  .chat-mic {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .chat-mic:hover { border-color: var(--bunq); color: var(--bunq); background: var(--bunq-pale); }
+  .chat-mic.recording {
+    border-color: var(--coral);
+    color: white;
+    background: var(--coral);
+    animation: rec-pulse 1s ease-in-out infinite;
+  }
+  .chat-mic.busy {
+    border-color: var(--bunq);
+    color: var(--bunq);
+    background: var(--bunq-pale);
+    cursor: wait;
+  }
 
   /* ─── BALANCE CARD (scene 0) ─── */
   #balance-card { background: linear-gradient(135deg, #EAF6FF 0%, #F0F9FF 100%); border-color: rgba(0,166,255,0.18); }
+  body.dark #balance-card { background: linear-gradient(135deg, rgba(0,166,255,0.10) 0%, rgba(0,166,255,0.06) 100%); border-color: rgba(0,166,255,0.22); }
 
   /* ═══════════════════════════════════════════════════════
      BUNQ HOME OVERLAY
@@ -1654,8 +1788,8 @@
               </div>
             </div>
           </div>
-
         </div>
+        
       </div>
 
       <!-- SCENE 2: CAMERA — point at menu -->
@@ -1701,6 +1835,16 @@
       <div class="scene" data-scene="3">
         <h2>Menu translated</h2>
         <p class="sub">Now tell me who's ordering what — I'll remember it for the split later.</p>
+        <div class="fx-card">
+          <div class="fx-card-left">
+            <div class="fx-label">EUR → JPY</div>
+            <div class="fx-rate">1 EUR = ¥160.01</div>
+          </div>
+          <div class="fx-card-right">
+            <div class="fx-pill">↑ 1.3% above 30-day avg</div>
+            <div class="fx-sentiment">Good day to spend in yen</div>
+          </div>
+        </div>
         <div class="menu-split">
           <div class="menu-photo">
             <svg viewBox="0 0 160 260" width="148" height="242">
@@ -1823,33 +1967,57 @@
       <!-- SCENE 5: CAPTURE (was scene 3) -->
       <div class="scene" data-scene="5">
         <h2 id="scene5-title">Captured</h2>
-        <p class="sub">Photo and voice note ready. Tap to send to travel buddy.</p>
+        <p class="sub">Review the original receipt and translation, then send it to travel buddy.</p>
         <!-- language detection badge — shown after AI analysis -->
         <div id="lang-badge-5" style="display:none" class="lang-badge"></div>
-        <div class="receipt">
-          <!-- real photo when camera/upload used -->
-          <img id="captured-photo" style="display:none;max-width:200px;max-height:240px;border-radius:8px;transform:rotate(-1.2deg);filter:drop-shadow(0 4px 12px rgba(0,0,0,0.12));object-fit:cover;" alt="captured receipt">
-          <!-- fallback SVG receipt -->
-          <svg id="receipt-svg" viewBox="0 0 240 300" width="200" height="250" style="transform: rotate(-1.2deg); filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));">
-            <rect x="12" y="10" width="216" height="280" fill="#FEFDFA" stroke="#D4D3CC" stroke-width="0.8"/>
-            <text x="120" y="36" font-size="13" font-weight="600" text-anchor="middle" fill="#2A2A28" font-family="serif">居酒屋さくら</text>
-            <text x="120" y="51" font-size="9" text-anchor="middle" fill="#888">Izakaya Sakura · Shibuya</text>
-            <line x1="26" y1="66" x2="214" y2="66" stroke="#D0D0CA" stroke-dasharray="2 2" stroke-width="0.5"/>
-            <g font-size="10" fill="#2A2A28">
-              <text x="26" y="86">唐揚げ</text><text x="214" y="86" text-anchor="end">¥1,200</text>
-              <text x="26" y="104">刺身盛り合わせ</text><text x="214" y="104" text-anchor="end">¥3,500</text>
-              <text x="26" y="122">焼き鳥 6本</text><text x="214" y="122" text-anchor="end">¥1,800</text>
-              <text x="26" y="140">餃子</text><text x="214" y="140" text-anchor="end">¥900</text>
-              <text x="26" y="158">ビール × 3</text><text x="214" y="158" text-anchor="end">¥2,400</text>
-              <text x="26" y="176">日本酒</text><text x="214" y="176" text-anchor="end">¥2,800</text>
-              <text x="26" y="194">水</text><text x="214" y="194" text-anchor="end">¥600</text>
-              <text x="26" y="212">お通し × 3</text><text x="214" y="212" text-anchor="end">¥900</text>
-            </g>
-            <line x1="26" y1="228" x2="214" y2="228" stroke="#888" stroke-width="0.6"/>
-            <text x="26" y="250" font-size="11" font-weight="600" fill="#2A2A28">合計</text>
-            <text x="214" y="250" text-anchor="end" font-size="12" font-weight="600" fill="#2A2A28">¥14,100</text>
-            <text x="120" y="275" font-size="8" text-anchor="middle" fill="#999">ありがとうございました</text>
-          </svg>
+        <div class="capture-compare">
+          <div class="capture-pane">
+            <div class="capture-pane-title">Original receipt</div>
+            <div class="receipt">
+              <!-- real photo when camera/upload used -->
+              <img id="captured-photo" style="display:none;max-width:200px;max-height:240px;border-radius:8px;transform:rotate(-1.2deg);filter:drop-shadow(0 4px 12px rgba(0,0,0,0.12));object-fit:cover;" alt="captured receipt">
+              <!-- fallback SVG receipt -->
+              <svg id="receipt-svg" viewBox="0 0 240 300" width="200" height="250" style="transform: rotate(-1.2deg); filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));">
+                <rect x="12" y="10" width="216" height="280" fill="#FEFDFA" stroke="#D4D3CC" stroke-width="0.8"/>
+                <text x="120" y="36" font-size="13" font-weight="600" text-anchor="middle" fill="#2A2A28" font-family="serif">居酒屋さくら</text>
+                <text x="120" y="51" font-size="9" text-anchor="middle" fill="#888">Izakaya Sakura · Shibuya</text>
+                <line x1="26" y1="66" x2="214" y2="66" stroke="#D0D0CA" stroke-dasharray="2 2" stroke-width="0.5"/>
+                <g font-size="10" fill="#2A2A28">
+                  <text x="26" y="86">唐揚げ</text><text x="214" y="86" text-anchor="end">¥1,200</text>
+                  <text x="26" y="104">刺身盛り合わせ</text><text x="214" y="104" text-anchor="end">¥3,500</text>
+                  <text x="26" y="122">焼き鳥 6本</text><text x="214" y="122" text-anchor="end">¥1,800</text>
+                  <text x="26" y="140">餃子</text><text x="214" y="140" text-anchor="end">¥900</text>
+                  <text x="26" y="158">ビール × 3</text><text x="214" y="158" text-anchor="end">¥2,400</text>
+                  <text x="26" y="176">日本酒</text><text x="214" y="176" text-anchor="end">¥2,800</text>
+                  <text x="26" y="194">水</text><text x="214" y="194" text-anchor="end">¥600</text>
+                  <text x="26" y="212">お通し × 3</text><text x="214" y="212" text-anchor="end">¥900</text>
+                </g>
+                <line x1="26" y1="228" x2="214" y2="228" stroke="#888" stroke-width="0.6"/>
+                <text x="26" y="250" font-size="11" font-weight="600" fill="#2A2A28">合計</text>
+                <text x="214" y="250" text-anchor="end" font-size="12" font-weight="600" fill="#2A2A28">¥14,100</text>
+                <text x="120" y="275" font-size="8" text-anchor="middle" fill="#999">ありがとうございました</text>
+              </svg>
+            </div>
+          </div>
+
+          <div class="capture-pane">
+            <div class="capture-pane-title">Translated receipt</div>
+            <div class="translated-card" id="translated-receipt">
+              <div class="translated-head">
+                <div class="translated-head-title">Izakaya Sakura</div>
+                <div class="translated-head-meta">JP -> EN</div>
+              </div>
+              <div class="translated-row"><span class="translated-jp">唐揚げ</span><span class="translated-en">Karaage</span><span class="translated-price">¥1,200 · €7.50</span></div>
+              <div class="translated-row"><span class="translated-jp">刺身盛り合わせ</span><span class="translated-en">Sashimi platter</span><span class="translated-price">¥3,500 · €21.87</span></div>
+              <div class="translated-row"><span class="translated-jp">焼き鳥 6本</span><span class="translated-en">Yakitori (6 skewers)</span><span class="translated-price">¥1,800 · €11.25</span></div>
+              <div class="translated-row"><span class="translated-jp">餃子</span><span class="translated-en">Gyoza</span><span class="translated-price">¥900 · €5.62</span></div>
+              <div class="translated-row"><span class="translated-jp">ビール × 3</span><span class="translated-en">Beer x 3</span><span class="translated-price">¥2,400 · €15.00</span></div>
+              <div class="translated-row"><span class="translated-jp">日本酒</span><span class="translated-en">Sake bottle</span><span class="translated-price">¥2,800 · €17.50</span></div>
+              <div class="translated-row"><span class="translated-jp">水</span><span class="translated-en">Water</span><span class="translated-price">¥600 · €3.75</span></div>
+              <div class="translated-row"><span class="translated-jp">お通し × 3</span><span class="translated-en">Cover charge x 3</span><span class="translated-price">¥900 · €5.62</span></div>
+              <div class="translated-total"><span>Total</span><span>¥14,100 · €88.13</span></div>
+            </div>
+          </div>
         </div>
         <!-- upload fallback -->
         <label class="upload-label" style="margin-bottom:8px">
@@ -1859,7 +2027,7 @@
         </label>
         <div class="voice voice-editable">
           <div class="voice-label">Voice note · transcribed · tap to edit</div>
-          <div class="voice-text" contenteditable="true" id="voice-transcript">"Sara had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."</div>
+          <div class="voice-text" contenteditable="true" id="voice-transcript">"Sara had sashimi platter, yakitori, and water. Marco had three beers and the sake bottle. I had karaage and gyoza. Split the cover charge evenly."</div>
         </div>
       </div>
       <!-- hidden canvas for frame capture -->
@@ -1926,7 +2094,7 @@
             <div class="split-drawer" id="draw-sara">
               <div class="split-drawer-inner">
                 <div class="drawer-msg-label">Message Sara will see</div>
-                <div class="drawer-msg-text" contenteditable="true">"Hi Sara, €23.13 for the izakaya tonight. You had sashimi + yakitori, no drinks 🍶"</div>
+                <div class="drawer-msg-text" contenteditable="true">"Hi Sara, €23.13 for Izakaya Sakura tonight. You had sashimi platter, yakitori, water, plus your share of the cover charge."</div>
               </div>
             </div>
           </div>
@@ -1952,7 +2120,7 @@
             <div class="split-drawer" id="draw-marco">
               <div class="split-drawer-inner">
                 <div class="drawer-msg-label">Message Marco will see</div>
-                <div class="drawer-msg-text" contenteditable="true">"Hey Marco, €36.25 for the drinks last night — beers, sake, and your share of the cover. Cheers!"</div>
+                <div class="drawer-msg-text" contenteditable="true">"Hey Marco, €36.25 for Izakaya Sakura — 3 beers, sake bottle, and your share of the cover charge."</div>
                 <div class="drawer-pay-opts">
                   <div class="drawer-pay-opt recommended" onclick="payMarco('bunq')">
                     <div class="drawer-pay-opt-left">
@@ -2003,8 +2171,11 @@
             <span class="chat-sug" onclick="askAssistant('Round to nearest euro')">Round to nearest €</span>
           </div>
           <div class="chat-input-row">
-            <input type="text" class="chat-input" placeholder="Ask travel buddy about this split..." onkeydown="if(event.key==='Enter') handleChatEnter(event, 'split')"/>
-            <button class="chat-send" onclick="handleChatEnter({target: this.previousElementSibling}, 'split')">Send</button>
+            <input type="text" class="chat-input" id="chat-input-split" placeholder="Ask travel buddy about this split..." onkeydown="if(event.key==='Enter') handleChatEnter(event, 'split')"/>
+            <button class="chat-mic" id="chat-mic-split" onclick="toggleChatMic('split')" title="Record question" aria-label="Record question">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10 C5 15.5 9 19 12 19 C15 19 19 15.5 19 10"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </button>
+            <button class="chat-send" onclick="handleChatEnter({target: document.getElementById('chat-input-split')}, 'split')">Send</button>
           </div>
         </div>
       </div>
@@ -2102,8 +2273,11 @@
             <span class="chat-sug" onclick="askAssistant('Cancel the reminder for Marco')">Cancel nudge</span>
           </div>
           <div class="chat-input-row">
-            <input type="text" class="chat-input" placeholder="Ask travel buddy anything..." onkeydown="if(event.key==='Enter') handleChatEnter(event, 'paid')"/>
-            <button class="chat-send" onclick="handleChatEnter({target: this.previousElementSibling}, 'paid')">Send</button>
+            <input type="text" class="chat-input" id="chat-input-paid" placeholder="Ask travel buddy anything..." onkeydown="if(event.key==='Enter') handleChatEnter(event, 'paid')"/>
+            <button class="chat-mic" id="chat-mic-paid" onclick="toggleChatMic('paid')" title="Record question" aria-label="Record question">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10 C5 15.5 9 19 12 19 C15 19 19 15.5 19 10"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </button>
+            <button class="chat-send" onclick="handleChatEnter({target: document.getElementById('chat-input-paid')}, 'paid')">Send</button>
           </div>
         </div>
 
@@ -2164,7 +2338,7 @@
   // ── SCENE LABELS ───────────────────────────────────────────
   const labels = [
     'Choose what to scan', 'Snap the menu', 'Later, snap the bill',
-    'Split after the meal', 'See the agents work', 'Let Finn handle it',
+    'Split after the meal', 'See the agents work', 'Send to travel buddy',
     'See the split', 'Mark as settled', 'Restart demo'
   ];
   const pills = [
@@ -2177,10 +2351,13 @@
     'Resolving Sara and Marco…', 'Preparing payment requests…'
   ];
   let current = 0;
+  const navStack = [];
   let activePath = 'bill';
 
   // ── SCENE TRANSITIONS ──────────────────────────────────────
-  function show(n, direction) {
+  function show(n, direction, fromBack = false) {
+  if (!fromBack && n !== current) { navStack.push(current); }
+  current = n;
     scenes.forEach((s, i) => {
       if (i === n) {
         requestAnimationFrame(() => {
@@ -2202,7 +2379,7 @@
 
     btn.textContent = labels[n] || labels[0];
     pill.textContent = pills[n] || pills[0];
-    btnBack.style.display = (n > 1 && n < SCENE_COUNT - 1) ? 'inline-flex' : 'none';
+    btnBack.style.display = n > 0 ? 'inline-flex' : 'none';
     btn.style.display = (n === 1 || n === 2 || n === 4) ? 'none' : 'flex';
 
     if (n === 6) { runAgents(); analyzeImage(); }
@@ -2242,6 +2419,7 @@
   // ── CAMERA ─────────────────────────────────────────────────
   let camStream   = null;
   let capturedB64 = null; // stored for /analyze-image
+  let capturedMimeType = 'image/jpeg'; // actual MIME type of captured image
 
   async function startCamera(videoEl, nopermEl) {
     if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
@@ -2320,9 +2498,11 @@
     if (camStream && video?.readyState >= 2) {
       const url = captureFrame(video);
       capturedB64 = url.split(',')[1];
+      capturedMimeType = 'image/jpeg';
       if (still) { still.src = url; still.classList.add('show'); }
       if (hint)  hint.style.opacity = '0';
       _showCapturedPhoto(url);
+      translateCapturedReceiptPreview();
     }
     document.getElementById('bill-flash')?.classList.add('flash-go');
     document.getElementById('bill-scanline')?.classList.add('scan-go');
@@ -2343,13 +2523,22 @@
   window.uploadPhoto = function(inputEl, slot) {
     const file = inputEl.files[0];
     if (!file) return;
+    capturedMimeType = file.type || 'image/jpeg'; // store actual MIME type
     const reader = new FileReader();
     reader.onload = e => {
       const dataUrl = e.target.result;
       capturedB64   = dataUrl.split(',')[1];
       _showCapturedPhoto(dataUrl);
+      translateCapturedReceiptPreview();
       const lbl = document.getElementById(slot === 'bill' ? 'bill-upload-label' : 'scene5-upload-label');
       if (lbl) lbl.textContent = '✓ ' + file.name;
+      
+      // If uploading from bill scene (scene 4), move to captured scene (scene 5)
+      if (slot === 'bill') {
+        setTimeout(() => {
+          current = 5; show(5, 1); stopCamera();
+        }, 300);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -2359,6 +2548,12 @@
   let audioChunks   = [];
   let isRecording   = false;
   let audioStream   = null;
+  const BrowserSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let noteRecognition = null;
+
+  function hasBrowserSpeechRecognition() {
+    return typeof BrowserSpeechRecognition !== 'undefined';
+  }
 
   async function startAudioStream() {
     if (audioStream) return;
@@ -2395,6 +2590,76 @@
     const barsEl = document.getElementById(barsId);
     const preEl  = document.getElementById(previewId);
 
+    // Prefer browser-native speech recognition when available.
+    if (hasBrowserSpeechRecognition()) {
+      if (isRecording && noteRecognition) {
+        noteRecognition.stop();
+        return;
+      }
+
+      let finalText = '';
+      noteRecognition = new BrowserSpeechRecognition();
+      noteRecognition.lang = 'en-US';
+      noteRecognition.continuous = false;
+      noteRecognition.interimResults = true;
+
+      isRecording = true;
+      btnEl.classList.add('recording');
+      lblEl.textContent = 'Listening… tap to stop';
+      barsEl.innerHTML = Array.from({length: 20}, () =>
+        `<div class="wbar" style="height:${4 + Math.random()*24}px;animation-delay:${Math.random()*0.4}s"></div>`
+      ).join('');
+      preEl.textContent = '';
+
+      noteRecognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const chunk = event.results[i][0]?.transcript || '';
+          if (event.results[i].isFinal) finalText += chunk + ' ';
+          else interim += chunk;
+        }
+        preEl.textContent = (finalText + interim).trim();
+      };
+
+      noteRecognition.onerror = () => {
+        preEl.textContent = 'Transcription failed';
+      };
+
+      noteRecognition.onend = () => {
+        isRecording = false;
+        btnEl.classList.remove('recording');
+        barsEl.innerHTML = '';
+        const text = finalText.trim();
+        if (text) {
+          preEl.textContent = text;
+          lblEl.textContent = 'Recorded ✓';
+          if (transcriptId) {
+            const t = document.getElementById(transcriptId);
+            if (t) t.textContent = text;
+          }
+        } else if (preEl.textContent && preEl.textContent !== 'Transcription failed') {
+          lblEl.textContent = 'Recorded ✓';
+          if (transcriptId) {
+            const t = document.getElementById(transcriptId);
+            if (t) t.textContent = preEl.textContent;
+          }
+        } else {
+          preEl.textContent = '[inaudible]';
+          lblEl.textContent = 'Could not transcribe';
+        }
+      };
+
+      try {
+        noteRecognition.start();
+      } catch {
+        isRecording = false;
+        btnEl.classList.remove('recording');
+        barsEl.innerHTML = '';
+        lblEl.textContent = 'Mic unavailable';
+      }
+      return;
+    }
+
     // STOP
     if (isRecording && mediaRecorder?.state === 'recording') {
       mediaRecorder.stop();
@@ -2408,9 +2673,7 @@
         ? 'Mic needs HTTPS — open the phone URL with https://'
         : 'Mic permission denied — check browser settings';
       if (lblEl) lblEl.textContent = why;
-      setTimeout(() => runTypewriter(fallback, preEl, barsEl, btnEl, lblEl, () => {
-        if (transcriptId) { const t = document.getElementById(transcriptId); if (t) t.textContent = fallback; }
-      }), 800);
+      if (preEl) preEl.textContent = 'Transcription unavailable';
       return;
     }
 
@@ -2442,15 +2705,19 @@
           body: JSON.stringify({ audio: base64, mimeType: actualMime.split(';')[0] }),
         });
         const data = await resp.json();
-        const text = (data.transcript && data.transcript !== '[inaudible]') ? data.transcript : fallback;
-        preEl.textContent = text;
-        lblEl.textContent = 'Recorded ✓';
-        if (transcriptId) { const t = document.getElementById(transcriptId); if (t) t.textContent = text; }
+        const text = (data.transcript || '').trim().replace(/^"+|"+$/g, '');
+        if (text && text !== '[inaudible]') {
+          preEl.textContent = text;
+          lblEl.textContent = 'Recorded ✓';
+          if (transcriptId) { const t = document.getElementById(transcriptId); if (t) t.textContent = text; }
+        } else {
+          preEl.textContent = '[inaudible]';
+          lblEl.textContent = 'Could not transcribe';
+        }
       } catch(err) {
         console.warn('[audio] transcription failed:', err.message);
-        preEl.textContent = fallback;
-        lblEl.textContent = 'Recorded ✓ (demo)';
-        if (transcriptId) { const t = document.getElementById(transcriptId); if (t) t.textContent = fallback; }
+        preEl.textContent = 'Transcription failed';
+        lblEl.textContent = 'Transcription failed';
       }
     };
 
@@ -2464,8 +2731,8 @@
   }
 
   // Fallback typewriter when no mic
-  const TRANSCRIPT_BILL = '"Sara had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."';
-  const TRANSCRIPT_MENU = '"Sara will have the sashimi platter and yakitori. Marco wants the beers and sake. I\'ll have the fried chicken and dumplings."';
+  const TRANSCRIPT_BILL = '"Sara had sashimi platter, yakitori, and water. Marco had three beers and the sake bottle. I had karaage and gyoza. Split the cover charge evenly."';
+  const TRANSCRIPT_MENU = '"Sara will have sashimi platter and yakitori. Marco wants beers and sake. I\'ll have karaage and gyoza."';
 
   function runTypewriter(text, preEl, barsEl, btnEl, lblEl, onDone) {
     btnEl.classList.add('recording');
@@ -2496,26 +2763,249 @@
     toggleRecording({ btnId:'record-btn-menu', labelId:'record-label-menu', barsId:'waveform-bars-menu', previewId:'voice-preview-menu', transcriptId:null, fallback: TRANSCRIPT_MENU });
   };
 
+  // ── CHAT DICTATION ────────────────────────────────────────
+  let chatRecorder = null;
+  let chatChunks   = [];
+  let chatTarget   = null;
+  let chatBusy     = false;
+  let chatSpeechRecognition = null;
+  let chatSpeechRecording = false;
+
+  function setChatMicVisual(target, mode) {
+    const btn = document.getElementById(`chat-mic-${target}`);
+    if (!btn) return;
+    btn.classList.toggle('recording', mode === 'recording');
+    btn.classList.toggle('busy', mode === 'busy');
+    btn.disabled = mode === 'busy';
+  }
+
+  window.toggleChatMic = async function(target) {
+    if (chatBusy) return;
+    const input = document.getElementById(`chat-input-${target}`);
+    if (!input) return;
+
+    // Prefer browser-native speech recognition when available.
+    if (hasBrowserSpeechRecognition()) {
+      if (chatSpeechRecording && chatSpeechRecognition && chatTarget === target) {
+        chatSpeechRecognition.stop();
+        return;
+      }
+
+      chatTarget = target;
+      chatSpeechRecognition = new BrowserSpeechRecognition();
+      chatSpeechRecognition.lang = 'en-US';
+      chatSpeechRecognition.continuous = false;
+      chatSpeechRecognition.interimResults = true;
+      chatSpeechRecording = true;
+      setChatMicVisual(target, 'recording');
+
+      let finalText = '';
+      chatSpeechRecognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const chunk = event.results[i][0]?.transcript || '';
+          if (event.results[i].isFinal) finalText += chunk + ' ';
+          else interim += chunk;
+        }
+        input.value = (finalText + interim).trim();
+      };
+
+      chatSpeechRecognition.onerror = () => {
+        input.placeholder = 'Transcription failed — try again';
+      };
+
+      chatSpeechRecognition.onend = () => {
+        chatSpeechRecording = false;
+        setChatMicVisual(target, 'idle');
+        if (!input.value.trim()) input.placeholder = 'Could not transcribe audio';
+      };
+
+      try {
+        chatSpeechRecognition.start();
+      } catch {
+        chatSpeechRecording = false;
+        setChatMicVisual(target, 'idle');
+        input.placeholder = 'Mic unavailable — use HTTPS and allow permission';
+      }
+      return;
+    }
+
+    if (chatRecorder?.state === 'recording' && chatTarget === target) {
+      chatRecorder.stop();
+      return;
+    }
+
+    await startAudioStream();
+    if (!audioStream) {
+      input.placeholder = 'Mic unavailable — use HTTPS and allow permission';
+      return;
+    }
+
+    chatTarget = target;
+    chatChunks = [];
+    const mime = getSupportedMime();
+    try {
+      chatRecorder = mime ? new MediaRecorder(audioStream, { mimeType: mime }) : new MediaRecorder(audioStream);
+    } catch (e) {
+      chatRecorder = new MediaRecorder(audioStream);
+    }
+
+    chatRecorder.ondataavailable = (e) => { if (e.data?.size > 0) chatChunks.push(e.data); };
+    chatRecorder.onstop = async () => {
+      const activeTarget = chatTarget;
+      const activeInput = document.getElementById(`chat-input-${activeTarget}`);
+      setChatMicVisual(activeTarget, 'busy');
+      chatBusy = true;
+      try {
+        const actualMime = chatRecorder.mimeType || 'audio/webm';
+        const blob = new Blob(chatChunks, { type: actualMime });
+        const base64 = await blobToBase64(blob);
+        const resp = await fetch(PROXY_BASE + '/upload-audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audio: base64, mimeType: actualMime.split(';')[0] }),
+        });
+        const data = await resp.json();
+        const transcript = (data.transcript || '').trim().replace(/^"+|"+$/g, '');
+        if (activeInput && transcript && transcript !== '[inaudible]') {
+          activeInput.value = transcript;
+          activeInput.focus();
+        } else if (activeInput) {
+          activeInput.placeholder = 'Could not transcribe audio';
+        }
+      } catch (err) {
+        if (activeInput) activeInput.placeholder = 'Transcription failed — try again';
+      } finally {
+        chatBusy = false;
+        setChatMicVisual(activeTarget, 'idle');
+      }
+    };
+
+    setChatMicVisual(target, 'recording');
+    chatRecorder.start();
+  };
+
   // ── AI BILL ANALYSIS ───────────────────────────────────────
   let aiSplit = null;
 
+  function setTranslatedReceiptLoading() {
+    const target = document.getElementById('translated-receipt');
+    if (!target) return;
+    target.innerHTML = `
+      <div class="translated-head">
+        <div class="translated-head-title">Translating receipt...</div>
+        <div class="translated-head-meta">Claude</div>
+      </div>
+      <div class="translated-row"><span class="translated-jp">...</span><span class="translated-en">Extracting line items</span><span class="translated-price">...</span></div>
+      <div class="translated-row"><span class="translated-jp">...</span><span class="translated-en">Detecting language and currency</span><span class="translated-price">...</span></div>
+      <div class="translated-total"><span>Total</span><span>Calculating...</span></div>
+    `;
+  }
+
+  async function requestSplitFromClaude() {
+    const transcript = document.getElementById('voice-transcript')?.textContent
+      || document.getElementById('voice-preview')?.textContent
+      || '';
+    if (!capturedB64) return null;
+
+    const resp = await fetch(PROXY_BASE + '/analyze-image', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: capturedB64, transcript, mimeType: capturedMimeType }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.ok || !data.split) {
+      throw new Error(data?.error || 'Translation failed');
+    }
+    return data.split;
+  }
+
+  async function translateCapturedReceiptPreview() {
+    if (!capturedB64) return;
+    setTranslatedReceiptLoading();
+    try {
+      const split = await requestSplitFromClaude();
+      if (!split) return;
+      aiSplit = split;
+      renderTranslatedReceipt(split);
+
+      const t5 = document.getElementById('scene5-title');
+      if (t5 && split.restaurant) t5.textContent = `Captured · ${split.restaurant}`;
+      const lb = document.getElementById('lang-badge-5');
+      if (lb && split.detected_language) {
+        lb.textContent = `${split.detected_language} · ${split.bill_currency_code}`;
+        lb.style.display = 'inline-flex';
+      }
+    } catch (err) {
+      console.warn('[vision] preview translate failed:', err.message);
+      const target = document.getElementById('translated-receipt');
+      if (target) {
+        target.innerHTML = `
+          <div class="translated-head">
+            <div class="translated-head-title">Translation unavailable</div>
+            <div class="translated-head-meta">Try again</div>
+          </div>
+          <div class="translated-row"><span class="translated-jp">Error</span><span class="translated-en">Could not translate this image yet.</span><span class="translated-price">-</span></div>
+          <div class="translated-total"><span>Status</span><span>Waiting</span></div>
+        `;
+      }
+    }
+  }
+
   async function analyzeImage() {
-    const transcript = document.getElementById('voice-transcript')?.textContent || '';
     if (!capturedB64) { console.log('[vision] no image — using demo values'); return; }
+    if (aiSplit) { renderSplit(aiSplit); return; }
 
     try {
-      const resp = await fetch(PROXY_BASE + '/analyze-image', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: capturedB64, transcript, mimeType: 'image/jpeg' }),
-      });
-      const data = await resp.json();
-      if (data.ok && data.split) { aiSplit = data.split; renderSplit(aiSplit); }
+      const split = await requestSplitFromClaude();
+      if (split) { aiSplit = split; renderSplit(aiSplit); }
     } catch(err) {
       console.warn('[vision] analyze failed:', err.message);
     }
   }
 
+  function renderTranslatedReceipt(split) {
+    const target = document.getElementById('translated-receipt');
+    if (!target) return;
+
+    const fallbackItems = [
+      { name_original: '唐揚げ', name_en: 'Karaage', price_original: 1200, price_eur: 7.5 },
+      { name_original: '刺身盛り合わせ', name_en: 'Sashimi platter', price_original: 3500, price_eur: 21.87 },
+      { name_original: '焼き鳥 6本', name_en: 'Yakitori (6 skewers)', price_original: 1800, price_eur: 11.25 },
+      { name_original: '餃子', name_en: 'Gyoza', price_original: 900, price_eur: 5.62 },
+      { name_original: 'ビール × 3', name_en: 'Beer x 3', price_original: 2400, price_eur: 15.0 },
+      { name_original: '日本酒', name_en: 'Sake bottle', price_original: 2800, price_eur: 17.5 },
+      { name_original: '水', name_en: 'Water', price_original: 600, price_eur: 3.75 },
+      { name_original: 'お通し × 3', name_en: 'Cover charge x 3', price_original: 900, price_eur: 5.62 },
+    ];
+
+    const items = split?.items?.length ? split.items : fallbackItems;
+    const restaurant = split?.restaurant || 'Izakaya Sakura';
+    const language = split?.translate_label || 'JP -> EN';
+    const billCurrency = split?.bill_currency || '¥';
+    const totalOriginal = split?.total_bill ?? 14100;
+    const totalEur = split?.total_bill_eur ?? 88.13;
+
+    const rows = items.map((it) => {
+      const original = it.name_original || it.name_en || 'Item';
+      const english = it.name_en || it.name_original || 'Item';
+      const oPrice = Number(it.price_original || 0).toLocaleString();
+      const ePrice = Number(it.price_eur || 0).toFixed(2);
+      return `<div class="translated-row"><span class="translated-jp">${original}</span><span class="translated-en">${english}</span><span class="translated-price">${billCurrency}${oPrice} · €${ePrice}</span></div>`;
+    }).join('');
+
+    target.innerHTML = `
+      <div class="translated-head">
+        <div class="translated-head-title">${restaurant}</div>
+        <div class="translated-head-meta">${language}</div>
+      </div>
+      ${rows}
+      <div class="translated-total"><span>Total</span><span>${billCurrency}${Number(totalOriginal).toLocaleString()} · €${Number(totalEur).toFixed(2)}</span></div>
+    `;
+  }
+
   function renderSplit(split) {
+    renderTranslatedReceipt(split);
+
     // Update agent subtitles with detected language/currency
     const sub1 = document.getElementById('agent-sub-1');
     const sub2 = document.getElementById('agent-sub-2');
@@ -2574,6 +3064,13 @@
           const shared = it.assigned_to === 'shared' ? ' (shared)' : '';
           return `${it.name_en || it.name_original} — ${split.bill_currency}${it.price_original?.toLocaleString()}${shared}`;
         }).join('<br>') || 'No items assigned';
+      const personalNames = (split.items || [])
+        .filter(it => it.assigned_to === p.name)
+        .map(it => it.name_en || it.name_original)
+        .slice(0, 3)
+        .join(', ');
+      const hasShared = (split.items || []).some(it => it.assigned_to === 'shared');
+      const messageSummary = [personalNames, hasShared ? 'plus shared items' : ''].filter(Boolean).join(' ');
 
       if (isAlex) return `
         <div class="split-row no-action">
@@ -2617,7 +3114,7 @@
               <div class="drawer-msg-label">Items · tap message to edit</div>
               <div class="drawer-msg-text" style="margin-bottom:8px;cursor:default;font-size:11px">${theirItems}</div>
               <div class="drawer-msg-label">Message</div>
-              <div class="drawer-msg-text" contenteditable="true">"Hi ${p.name}, ${eurLabel} for dinner. ${p.note} 🧾"</div>
+              <div class="drawer-msg-text" contenteditable="true">"Hi ${p.name}, ${eurLabel} for Izakaya Sakura: ${messageSummary || p.note}."</div>
               ${!isSara ? `<div class="drawer-pay-opts" style="margin-top:8px">
                 <div class="drawer-pay-opt recommended" onclick="payMarco('bunq')">
                   <div class="drawer-pay-opt-left">
@@ -2649,7 +3146,7 @@
         const amt  = aiSplit ? String(aiSplit.people[0]?.subtotal_eur?.toFixed(2)) : '23.13';
         const resp = await fetch(PROXY_BASE + '/request-money', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: amt, currency: 'EUR', email: 'sara.demo@bunq.com', description: `Dinner — Sara share` }),
+          body: JSON.stringify({ amount: amt, currency: 'EUR', email: 'sara.demo@bunq.com', description: `Izakaya Sakura — Sara: sashimi, yakitori, water + cover share` }),
         });
         const data = await resp.json();
         if (data.ok) {
@@ -2728,7 +3225,7 @@
 
   // ── CHAT ───────────────────────────────────────────────────
   const scriptedAnswers = {
-    'Explain the split': `Sara had the food (sashimi + yakitori, no drinks). Marco had the drinks (beers + sake). Alex paid the full bill and is collecting.`,
+    'Explain the split': `Sara had sashimi platter, yakitori, water, and cover share. Marco had three beers, sake bottle, and cover share. Alex paid at the table and is collecting.`,
     'What if Marco pays in USD?': `Marco's share converts to roughly $39 at today's rate. The bunq link handles currency automatically.`,
     'Round to nearest euro': `Rounded: Sara €24, Marco €37, Alex €28. Difference goes into your Tokyo trip pot.`,
     'Why do izakayas charge for otoshi?': `お通し (otoshi) is a small appetizer served automatically — it doubles as a cover charge. Refusing is possible but considered impolite.`,
@@ -2774,373 +3271,6 @@
       typing.textContent = reply;
       thread.scrollTop   = thread.scrollHeight;
     }, 400 + Math.random() * 300);
-  };
-
-  window.handleChatEnter = function(e, where) {
-    const input = e.target;
-    const q = input.value.trim();
-    if (!q) return;
-    input.value = '';
-    askAssistant(q);
-  };
-
-  checkProxy();
-  show(0, 1);
-})();
-</script>
-</body>
-</html>
-  let live = false;
-  const SCENE_COUNT = 9;
-
-  const scenes  = document.querySelectorAll('.scene');
-  const btn     = document.getElementById('btn');
-  const btnBack = document.getElementById('btn-back');
-  const pill    = document.getElementById('pill');
-
-  const labels = [
-    'Choose what to scan',   // 0
-    'Snap the menu',         // 1 — hidden (mode cards drive it)
-    'Later, snap the bill',  // 2 camera-menu — hidden (shutter drives it)
-    'Split after the meal',  // 3 menu translated → goes to agents
-    'See the agents work',   // 4 camera-bill — hidden (shutter drives it)
-    'Let travel buddy handle it',    // 5 capture
-    'See the split',         // 6 agents
-    'Mark as settled',       // 7 split
-    'Restart demo'           // 8 settled
-  ];
-  const pills = [
-    'Tokyo', 'What do you need?', 'Scan menu', 'Menu', 'Scan bill', 'Captured', 'Working', 'Split ready', 'Settled'
-  ];
-  const statusLines = [
-    'Reading the receipt...', 'Translating from Japanese...',
-    'Converting ¥ to €...', 'Resolving Sara and Marco...',
-    'Calculating per-diner amounts...', 'Preparing payment requests...'
-  ];
-  let current = 0;
-
-  let activePath = 'bill'; // 'menu' or 'bill' — set by pickMode
-
-  // Mode pick — menu goes to camera-menu (2), bill goes to camera-bill (4)
-  window.pickMode = function(mode) {
-    activePath = mode;
-    if (mode === 'menu') { current = 2; show(2, 1); }
-    else                 { current = 4; show(4, 1); }
-  };
-
-  window.goBack = function() {
-    if (current === 6 && activePath === 'menu') {
-      // agents reached via menu path — go back to menu scene, not bill capture
-      current = 3; show(3, -1);
-    } else if (current > 0) {
-      current--; show(current, -1);
-    }
-  };
-
-  // ── CAMERA: MENU ──────────────────────────────────────────
-  window.shootMenu = function() {
-    const shutter  = document.getElementById('menu-shutter');
-    const flash    = document.getElementById('menu-flash');
-    const scanline = document.getElementById('menu-scanline');
-    if (!shutter || shutter.disabled) return;
-    shutter.disabled = true;
-
-    // flash
-    flash.classList.add('flash-go');
-    // scanline sweep
-    scanline.classList.add('scan-go');
-
-    setTimeout(() => {
-      flash.classList.remove('flash-go');
-      scanline.classList.remove('scan-go');
-      current = 3; show(3, 1);
-      shutter.disabled = false;
-    }, 900);
-  };
-
-  // ── CAMERA: BILL ──────────────────────────────────────────
-  window.shootBill = function() {
-    const shutter  = document.getElementById('bill-shutter');
-    const flash    = document.getElementById('bill-flash');
-    const scanline = document.getElementById('bill-scanline');
-    if (!shutter || shutter.disabled) return;
-    shutter.disabled = true;
-
-    flash.classList.add('flash-go');
-    scanline.classList.add('scan-go');
-
-    setTimeout(() => {
-      flash.classList.remove('flash-go');
-      scanline.classList.remove('scan-go');
-      current = 5; show(5, 1);
-      shutter.disabled = false;
-    }, 900);
-  };
-
-  // ── VOICE RECORDING ───────────────────────────────────────
-  const TRANSCRIPT_BILL = '"Sara had the sashimi and yakitori. Marco had the beers and sake. I had the fried chicken and dumplings."';
-  const TRANSCRIPT_MENU = '"Sara will have the sashimi platter and yakitori. Marco wants the beers and sake. I\'ll have the fried chicken and dumplings."';
-  let recording = false;
-  let recTimer  = null;
-
-  function runTypewriter(text, previewEl, barsEl, btnEl, labelEl, onDone) {
-    btnEl.classList.add('recording');
-    labelEl.textContent = 'Recording...';
-    previewEl.textContent = '';
-    barsEl.innerHTML = Array.from({length: 20}, () =>
-      `<div class="wbar" style="height:${4 + Math.random()*24}px;animation-delay:${Math.random()*0.4}s"></div>`
-    ).join('');
-    let i = 0;
-    recTimer = setInterval(() => {
-      previewEl.textContent = text.slice(0, ++i);
-      if (i >= text.length) {
-        clearInterval(recTimer);
-        setTimeout(() => {
-          recording = false;
-          btnEl.classList.remove('recording');
-          labelEl.textContent = 'Recorded ✓';
-          barsEl.innerHTML = '';
-          if (onDone) onDone();
-        }, 380);
-      }
-    }, 36);
-  }
-
-  window.startRecording = function() {
-    if (recording) return;
-    recording = true;
-    runTypewriter(
-      TRANSCRIPT_BILL,
-      document.getElementById('voice-preview'),
-      document.getElementById('waveform-bars'),
-      document.getElementById('record-btn'),
-      document.getElementById('record-label'),
-      () => {
-        const t = document.getElementById('voice-transcript');
-        if (t) t.textContent = TRANSCRIPT_BILL;
-      }
-    );
-  };
-
-  window.startRecordingMenu = function() {
-    if (recording) return;
-    recording = true;
-    runTypewriter(
-      TRANSCRIPT_MENU,
-      document.getElementById('voice-preview-menu'),
-      document.getElementById('waveform-bars-menu'),
-      document.getElementById('record-btn-menu'),
-      document.getElementById('record-label-menu'),
-      null
-    );
-  };
-
-  async function checkProxy() {
-    const banner = document.getElementById('live-banner');
-    const text   = document.getElementById('live-text');
-    try {
-      const res  = await fetch(PROXY_BASE + '/health', { method: 'GET' });
-      const data = await res.json();
-      if (data.ok) {
-        live = true;
-        banner.classList.replace('mock','live');
-        const chatBadge = data.chatLive ? ' · chat live' : ' · chat scripted';
-        text.innerHTML = `Live · connected to <span class="bunq-wordmark">bunq</span> sandbox · ${data.balance.currency} ${data.balance.value}${chatBadge}`;
-        const bc = document.getElementById('balance-card');
-        if (bc) {
-          bc.style.display = 'block';
-          document.getElementById('balance-val').textContent = `${data.balance.currency} ${data.balance.value}`;
-          document.getElementById('balance-sub').textContent = data.accountDesc || `Account #${data.accountId}`;
-        }
-      } else throw new Error('not ready');
-    } catch(e) {
-      live = false;
-      banner.classList.replace('live','mock');
-      text.innerHTML = 'Mock mode · <span class="bunq-wordmark">bunq</span> proxy not reachable';
-    }
-  }
-
-  function show(n, direction) {
-    // direction: 1 = forward, -1 = back
-    const outClass = direction >= 0 ? 'exit-left' : '';
-    scenes.forEach((s, i) => {
-      if (i === n) {
-        s.classList.remove('exit-left');
-        // small rAF to trigger transition from initial translate state
-        requestAnimationFrame(() => {
-          if (direction < 0) s.style.transform = 'translateX(-28px)';
-          else               s.style.transform = 'translateX(28px)';
-          s.style.opacity = '0';
-          s.classList.add('active');
-          requestAnimationFrame(() => {
-            s.style.transform = '';
-            s.style.opacity   = '';
-          });
-        });
-      } else if (s.classList.contains('active')) {
-        s.style.transform = direction >= 0 ? 'translateX(-28px)' : 'translateX(28px)';
-        s.style.opacity   = '0';
-        setTimeout(() => {
-          s.classList.remove('active');
-          s.style.transform = '';
-          s.style.opacity   = '';
-        }, 320);
-      }
-    });
-
-    btn.textContent        = labels[n] || labels[0];
-    pill.textContent       = pills[n]  || pills[0];
-    // hide back on scene 0, scene 1 (cards drive it), and final scene
-    btnBack.style.display  = (n > 1 && n < SCENE_COUNT - 1) ? 'inline-flex' : 'none';
-    // hide main CTA on mode-pick scene (1) and both camera scenes (2,4) — buttons drive those
-    btn.style.display      = (n === 1 || n === 2 || n === 4) ? 'none' : 'flex';
-    if (n === 6) runAgents();
-  }
-
-
-  function runAgents() {
-    const agentEls = document.querySelectorAll('.agent');
-    const status   = document.getElementById('status-line');
-    agentEls.forEach(a => a.classList.remove('active','done'));
-    if (status) status.textContent = statusLines[0];
-    agentEls.forEach((a, i) => {
-      setTimeout(() => { a.classList.add('active'); if (status) status.textContent = statusLines[i]; }, i * 500);
-      setTimeout(() => { a.classList.remove('active'); a.classList.add('done'); }, i * 500 + 420);
-    });
-    setTimeout(() => { if (status) status.textContent = 'All done — tap to see the split.'; }, agentEls.length * 500 + 200);
-  }
-
-  btn.addEventListener('click', () => {
-    // Scene 3 (menu path) skips bill capture entirely — goes straight to agents
-    if (current === 3) { current = 6; show(6, 1); return; }
-    current = (current + 1) % SCENE_COUNT;
-    show(current, 1);
-  });
-
-  window.paySara = async function() {
-    const b    = document.getElementById('btn-sara');
-    const sub  = document.getElementById('success-sub');
-    const reqEl = document.getElementById('req-id');
-    const tKv   = document.getElementById('tricount-kv');
-    const tVal  = document.getElementById('tricount-val');
-
-    if (live) {
-      b.disabled = true;
-      b.textContent = 'Sending via bunq...';
-      try {
-        const res  = await fetch(PROXY_BASE + '/request-money', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: '23.13', currency: 'EUR', email: 'sara.demo@bunq.com', description: 'Izakaya Sakura — Sara share' })
-        });
-        const data = await res.json();
-        if (res.ok && data.ok) {
-          sub.innerHTML = `Real bunq request-inquiry created for €${data.amount}.<br>Marco's payment link is on its way.`;
-          reqEl.textContent   = `request-inquiry id: ${data.requestId}`;
-          reqEl.style.display = 'inline-block';
-          if (tKv) tKv.textContent = 'Live bunq + Tricount';
-          if (tVal) tVal.textContent = `request-inquiry #${data.requestId} · €88.13 logged`;
-        } else throw new Error(data.error || 'request failed');
-      } catch(e) {
-        console.warn('Live request failed:', e.message);
-        sub.innerHTML = `Sara sent €23.13 via bunq — instant.<br>Payment link sent to Marco.`;
-      }
-      b.disabled = false;
-    }
-    current = 8; show(8, 1);
-  };
-
-  window.payMarco = function(method) {
-    const sub = document.getElementById('success-sub');
-    if (sub) {
-      sub.innerHTML = method === 'bunq'
-        ? 'Sara sent €23.13 via <span class="bunq-wordmark">bunq</span> — instant.<br><span class="bunq-wordmark">bunq</span> link sent to Marco with a 2-minute sign-up.'
-        : 'Sara sent €23.13 via <span class="bunq-wordmark">bunq</span> — instant.<br>Payment link sent via an external provider (1–2 days, fees applied).';
-    }
-    current = 8; show(8, 1);
-  };
-
-  window.toggleSettledChip = function(id) {
-    const detail = document.getElementById(id);
-    if (!detail) return;
-    const chevId = id.replace('chip-', 'chev-');
-    const chev   = document.getElementById(chevId);
-    const isOpen = detail.classList.contains('open');
-    // close all
-    document.querySelectorAll('.settled-chip-detail.open').forEach(d => d.classList.remove('open'));
-    document.querySelectorAll('.settled-chip-chevron.open').forEach(c => c.classList.remove('open'));
-    // open this one unless it was already open
-    if (!isOpen) {
-      detail.classList.add('open');
-      if (chev) chev.classList.add('open');
-    }
-  };
-
-  window.toggleMemoryDetail = function() {
-    document.getElementById('memory-detail')?.classList.toggle('open');
-  };
-
-  window.toggleDraw = function(id) {
-    const drawer = document.getElementById(id);
-    if (!drawer) return;
-    const isOpen = drawer.classList.contains('open');
-    // close all drawers first
-    document.querySelectorAll('.split-drawer.open').forEach(d => d.classList.remove('open'));
-    // open this one unless it was already open
-    if (!isOpen) drawer.classList.add('open');
-  };
-
-  const scriptedAnswers = {
-    'Why do izakayas charge for otoshi?': 'お通し (otoshi) is a small appetizer automatically served when you sit down — it doubles as a cover charge, typically 300–900¥ per person. Refusing it is technically possible but considered rude.',
-    'Add Alex to the split': 'Alex wasn\'t at the izakaya tonight — I didn\'t include her. Want me to message her anyway and split €88.13 four ways (€22.03 each)?',
-    'What if Marco pays in USD?': 'Marco\'s share is €36.25 ≈ $39.13 at today\'s rate. The bunq link auto-detects his currency. Other providers convert at their own (typically worse) rates.',
-    'Round everyone up to nearest euro': 'Rounded: Sara €24, Marco €37, you €29. The extra €1.62 goes into your Tokyo trip pot.',
-    'Export this trip as a PDF': 'I\'ll compile the Tokyo trip (7 expenses, €431 total) as a PDF. Ready in 10 seconds — sent to your bunq inbox.',
-    'Show me my Tokyo food spending': 'Food so far this trip: €267.40 across 5 meals. Average €53.50/meal. The izakaya tonight was your 2nd highest.',
-    'Cancel the reminder for Marco': 'Reminder canceled. Marco won\'t get a nudge. I\'ll still notify you if the payment link is opened.'
-  };
-
-  window.askAssistant = async function(question) {
-    const activeScene = document.querySelector('.scene.active');
-    if (!activeScene) return;
-    const threadId = activeScene.dataset.scene === '8' ? 'chat-thread-paid' : 'chat-thread-split';
-    const thread   = document.getElementById(threadId);
-    if (!thread) return;
-
-    const userBubble = document.createElement('div');
-    userBubble.className   = 'chat-msg chat-msg-user';
-    userBubble.textContent = question;
-    thread.appendChild(userBubble);
-
-    const typing = document.createElement('div');
-    typing.className   = 'chat-msg chat-msg-bot chat-typing';
-    typing.textContent = 'Thinking...';
-    thread.appendChild(typing);
-    thread.scrollTop = thread.scrollHeight;
-
-    let reply = null;
-    try {
-      const res  = await fetch(PROXY_BASE + '/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question })
-      });
-      const data = await res.json();
-      if (res.ok && data.ok && data.reply) reply = data.reply;
-    } catch (e) {
-      console.warn('[chat] live call failed, using scripted fallback:', e.message);
-    }
-
-    if (!reply) {
-      reply = scriptedAnswers[question] || 'Let me look into that — it would route through the Group and Split agents. (Live chat unavailable; ANTHROPIC_API_KEY not configured in the proxy.)';
-    }
-
-    typing.remove();
-    const botBubble = document.createElement('div');
-    botBubble.className   = 'chat-msg chat-msg-bot';
-    botBubble.textContent = reply;
-    thread.appendChild(botBubble);
-    thread.scrollTop = thread.scrollHeight;
   };
 
   window.handleChatEnter = function(e, where) {

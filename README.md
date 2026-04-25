@@ -38,17 +38,45 @@ ANTHROPIC_API_KEY=sk-ant-api03-...your-real-key
 
 The proxy reads `.env` automatically on startup. Don't commit this file — it's already in `.gitignore`.
 
-### 3. Run
+### 3. Generate TLS certificates (for HTTPS)
+
+The proxy serves HTTP on port **3000** and HTTPS on port **3001**. HTTPS is needed when accessing the demo from a phone or tablet (browsers block camera/mic over plain HTTP on non-localhost origins).
+
+The proxy auto-generates a self-signed certificate on first run if `openssl` is on your PATH:
+
+```
+[https] Generating self-signed cert...
+[https] cert.pem + key.pem created.
+```
+
+If you prefer to generate the files yourself beforehand:
+
+```bash
+openssl req -x509 -newkey rsa:2048 \
+  -keyout key.pem -out cert.pem \
+  -days 365 -nodes \
+  -subj "/CN=travel-buddy-local"
+```
+
+Place both files in the same directory as `bunq-proxy.js`. They are gitignored and never committed.
+
+> **Browser warning** — because the cert is self-signed, browsers will show a security warning the first time you open `https://<your-ip>:3001`. Click **Advanced → Proceed** (Chrome/Edge) or **Accept the Risk** (Firefox) to continue. This is expected and safe on a local network.
+
+If `openssl` is not available the proxy still starts on HTTP; the HTTPS port is simply skipped.
+
+### 4. Run
 
 ```bash
 node bunq-proxy.js
 ```
 
-First-run output:
+First-run output (with HTTPS):
 
 ```
 Booting travel buddy proxy...
 [anthropic] ANTHROPIC_API_KEY found — /chat live.
+[https] Generating self-signed cert...
+[https] cert.pem + key.pem created.
 [bunq] Generating RSA-2048 keypair...
 [bunq] Creating installation...
 [bunq] Installation token stored.
@@ -61,11 +89,13 @@ Booting travel buddy proxy...
 [bunq] READY — balance EUR 500.00
 
   Demo + proxy live at:  http://localhost:3000
+  📱 Phone:  https://<your-local-ip>:3001
+  ⚠️  Tap "Advanced → Proceed" on the browser security warning (self-signed cert).
 ```
 
-### 4. Open the demo
+### 5. Open the demo
 
-Go to `http://localhost:3000`. The banner at the top confirms what's connected:
+Go to `http://localhost:3000` on the same machine, or `https://<your-local-ip>:3001` from a phone on the same Wi-Fi network. The banner at the top confirms what's connected:
 
 - `Live · connected to bunq sandbox · EUR 500.00 · chat live` — both integrations working
 - `Live · connected to bunq sandbox · EUR 500.00 · chat scripted` — bunq works, Claude not configured (chat falls back to scripted answers)
@@ -105,6 +135,12 @@ curl http://localhost:3000/health
 ```
 
 Expected response includes `"ok":true`, your user ID, account ID, and balance.
+
+For the HTTPS port, pass `-k` to skip cert verification (self-signed):
+
+```bash
+curl -k https://localhost:3001/health
+```
 
 Test the bunq endpoint:
 
@@ -175,10 +211,17 @@ The error message will tell you what bunq or Anthropic returned.
 
 **Browser can't reach localhost:3000** — try `http://127.0.0.1:3000`. Some local firewalls block `localhost`.
 
+**HTTPS port 3001 not listed in startup output** — `openssl` is not on your PATH. Either install it (it ships with Git for Windows) or generate `cert.pem` and `key.pem` manually (see step 3) and restart the proxy.
+
+**Phone shows "Your connection is not private"** — the self-signed cert is working correctly; tap **Advanced → Proceed** to continue. If the page never loads at all, check that your phone is on the same Wi-Fi network and that port 3001 is not blocked by a local firewall.
+
+**cert.pem / key.pem already exist but HTTPS still fails** — delete both files and let the proxy regenerate them, or re-run the `openssl` command in step 3 to overwrite them.
+
 ## Security notes
 
 - `.env` contains real secrets. It's in `.gitignore` and must never be committed.
 - `bunq-keys.json` contains your RSA private key for the bunq handshake. Also gitignored.
+- `cert.pem` and `key.pem` are the TLS certificate and private key for the local HTTPS server. Both are gitignored. They are self-signed and local-only — safe to regenerate freely.
 - The bunq sandbox key only works on bunq's test environment with fake money. The Anthropic key is real money — guard it like a credit card. Rotate immediately if it ever leaks.
 - For production, secrets would live in a proper secret manager (AWS Secrets Manager, GCP Secret Manager, etc.), not a `.env` file.
 

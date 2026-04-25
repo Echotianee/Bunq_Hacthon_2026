@@ -417,18 +417,19 @@ async function handleRequest(req, res) {
   // ── /upload-audio ───────────────────────────────────────────
   if (req.method === 'POST' && req.url === '/upload-audio') {
     if (!ANTHROPIC_KEY) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'no key' })); return; }
+    let mime = 'audio/webm';
     try {
       const input    = JSON.parse(await collectBody() || '{}');
       const audioB64 = input.audio;
-      const mime     = input.mimeType || 'audio/webm';
+      mime           = input.mimeType || 'audio/webm';
       if (!audioB64) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: 'no audio' })); return; }
       console.log(`[audio] transcribing ${Math.round(audioB64.length * 0.75 / 1024)}KB of ${mime}`);
 
       const body = JSON.stringify({
-        model: 'claude-haiku-4-5', max_tokens: 300,
+        model: 'claude-sonnet-4-5', max_tokens: 300,
         system: 'Transcribe this audio exactly as spoken in English. Return ONLY the transcript — no quotes, no labels. If inaudible: [inaudible]',
         messages: [{ role: 'user', content: [
-          { type: 'document', source: { type: 'base64', media_type: mime, data: audioB64 } },
+          { type: 'audio', source: { type: 'base64', media_type: mime, data: audioB64 } },
           { type: 'text', text: 'Transcribe this voice note.' },
         ]}],
       });
@@ -438,8 +439,14 @@ async function handleRequest(req, res) {
       res.end(JSON.stringify({ ok: true, transcript }));
     } catch (err) {
       console.error('[audio] failed:', err.message);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: err.message }));
+      const msg = String(err.message || 'audio transcription failed');
+      if (msg.includes('media_type') || msg.includes('invalid_request_error') || msg.includes('Input should be')) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: `Audio transcription via Anthropic is unsupported for ${mime} in this endpoint. Use browser speech recognition.` }));
+      } else {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: msg }));
+      }
     }
     return;
   }
